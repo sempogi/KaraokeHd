@@ -1001,7 +1001,7 @@ microStroke: true,
 aod: false,
 fill: '#00b3ff',
 base: '#ffffff',
-bg: 'rgba(0,0,0,0)',
+bg: '#00ff00',
 glow: 10,
 strokeW: 1,
 blend: 'normal',
@@ -1044,6 +1044,8 @@ try {
 localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
 }catch(e) {}
 }
+
+
 function deepMerge(a, b) {
 for (const k of Object.keys(b)) {
 if (b[k] && typeof b[k] === 'object'&&!Array.isArray(b[k])) {
