@@ -5875,7 +5875,7 @@ function rebuildLyricSourceOptions(metaEvs) {
     video.id = 'karoBgVideo';
     video.className = 'karoBgVideo';
     video.autoplay = true;
-    video.loop = true;
+    video.loop = false;
     video.muted = true;
     video.playsInline = true;    // mobile-safe autoplay
     video.preload = 'auto';
@@ -6148,6 +6148,238 @@ function rebuildLyricSourceOptions(metaEvs) {
 
   /* ========= Initial state ========= */
   miniPanel.style.display = 'none';
+})();
+</script>
+
+<script>
+(function () {
+  if (!('mediaSession' in navigator)) {
+    console.warn('Media Session API not supported in this browser.');
+    return;
+  }
+
+  // ---- Helpers to reach your state ----
+  function getVideo() {
+    return document.getElementById('karoBgVideo');
+  }
+  function getState() {
+    const pl  = (window.pl && Array.isArray(window.pl)) ? window.pl : [];
+    const idx = (typeof window.idx === 'number') ? window.idx : -1;
+    return { pl, idx };
+  }
+
+  // Build nice metadata for OS UI
+  function buildMetadata(item, i, total) {
+    const fileName = item?.name || 'Unknown';
+    const title = fileName.replace(/\.[a-z0-9]+$/i, '');
+    const artist = 'KaraokeHD';           // you can change this
+    const album = `Playlist ${i+1}/${total}`;
+    const artwork = [];                   // provide URLs if you have covers
+    // artwork.push({ src: 'assets/covers/' + title + '.png', sizes: '512x512', type: 'image/png' });
+
+    return new MediaMetadata({ title, artist, album, artwork });
+  }
+
+  // Publish/update metadata + state
+  function updateMediaSession() {
+    const v = getVideo();
+    const { pl, idx } = getState();
+    if (!pl.length || idx < 0 || idx >= pl.length) return;
+
+    try {
+      navigator.mediaSession.metadata = buildMetadata(pl[idx], idx, pl.length);
+    } catch (e) {}
+
+    // Playback state hint
+    if (v) {
+      try {
+        navigator.mediaSession.playbackState = v.paused ? 'paused' : 'playing';
+        navigator.mediaSession.setPositionState({
+          duration: isFinite(v.duration) ? v.duration : 0,
+          position: isFinite(v.currentTime) ? v.currentTime : 0,
+          playbackRate: v.playbackRate || 1
+        });
+      } catch (e) {}
+    }
+  }
+
+  // Wire OS actions to your functions/video
+  function wireActionHandlers() {
+    const v = getVideo();
+
+    try {
+      navigator.mediaSession.setActionHandler('play', async () => {
+        try { await v?.play(); } catch (_) {}
+        updateMediaSession();
+      });
+    } catch (_) {}
+    try {
+      navigator.mediaSession.setActionHandler('pause', () => {
+        try { v?.pause(); } catch (_) {}
+        updateMediaSession();
+      });
+    } catch (_) {}
+    try {
+      navigator.mediaSession.setActionHandler('nexttrack', () => {
+        if (typeof window.next === 'function') window.next();
+        else if (typeof window.playIndex === 'function') {
+          const { pl, idx } = getState();
+          if (idx + 1 < pl.length) window.playIndex(idx + 1);
+        }
+        setTimeout(updateMediaSession, 50);
+      });
+    } catch (_) {}
+    try {
+      navigator.mediaSession.setActionHandler('previoustrack', () => {
+        if (typeof window.prev === 'function') window.prev();
+        else if (typeof window.playIndex === 'function') {
+          const { pl, idx } = getState();
+          if (idx - 1 >= 0) window.playIndex(idx - 1);
+        }
+        setTimeout(updateMediaSession, 50);
+      });
+    } catch (_) {}
+
+    // Optional seek handlers:
+    try {
+      navigator.mediaSession.setActionHandler('seekto', (details) => {
+        if (!v || typeof details.seekTime !== 'number') return;
+        v.currentTime = details.seekTime;
+        updateMediaSession();
+      });
+      navigator.mediaSession.setActionHandler('seekforward', () => {
+        if (!v) return;
+        v.currentTime = Math.min(v.duration || v.currentTime + 10, v.currentTime + 10);
+        updateMediaSession();
+      });
+      navigator.mediaSession.setActionHandler('seekbackward', () => {
+        if (!v) return;
+        v.currentTime = Math.max(0, v.currentTime - 10);
+        updateMediaSession();
+      });
+    } catch (_) {}
+  }
+
+  // Keep metadata fresh when your app changes track
+  function attachTrackChangeHooks() {
+    if (typeof window.playIndex === 'function' && !window.__ms_wrapped_playIndex) {
+      const orig = window.playIndex;
+      window.playIndex = function(i) {
+        const res = orig.call(this, i);
+        setTimeout(updateMediaSession, 50);
+        return res;
+      };
+      window.__ms_wrapped_playIndex = true;
+    }
+    if (typeof window.next === 'function' && !window.__ms_wrapped_next) {
+      const orig = window.next;
+      window.next = function() {
+        const res = orig.call(this);
+        setTimeout(updateMediaSession, 50);
+        return res;
+      };
+      window.__ms_wrapped_next = true;
+    }
+    if (typeof window.prev === 'function' && !window.__ms_wrapped_prev) {
+      const orig = window.prev;
+      window.prev = function() {
+        const res = orig.call(this);
+        setTimeout(updateMediaSession, 50);
+        return res;
+      };
+      window.__ms_wrapped_prev = true;
+    }
+
+    // Also update on actual play/pause/time changes
+    const v = getVideo();
+    if (v && !v.__ms_bound) {
+      v.addEventListener('play', updateMediaSession);
+      v.addEventListener('pause', updateMediaSession);
+      v.addEventListener('timeupdate', () => {
+        try {
+          navigator.mediaSession.setPositionState({
+            duration: isFinite(v.duration) ? v.duration : 0,
+            position: isFinite(v.currentTime) ? v.currentTime : 0,
+            playbackRate: v.playbackRate || 1
+          });
+        } catch (e) {}
+      });
+      v.addEventListener('ended', () => setTimeout(updateMediaSession, 100));
+      v.__ms_bound = true;
+    }
+  }
+
+  wireActionHandlers();
+  attachTrackChangeHooks();
+  updateMediaSession();
+
+  // If the video element is created later, re-hook automatically
+  const target = document.getElementById('winKaro') || document.body;
+  const mo = new MutationObserver(() => {
+    const v = getVideo();
+    if (v && !v.__ms_bound) {
+      attachTrackChangeHooks();
+      updateMediaSession();
+    }
+  });
+  mo.observe(target, { childList: true, subtree: true });
+})();
+</script>
+
+<script>
+(function () {
+  // Find your karaoke window
+  const win = document.getElementById('winKaro');
+  if (!win) return;
+
+  // Helper: ensure the video element exists (your code may append it lazily)
+  function getVideo() {
+    return document.getElementById('karoBgVideo');
+  }
+
+  // Arm the one-time gesture when the video is present
+  function armGestureOnce() {
+    // If the video is not yet on the DOM, wait for it
+    const v = getVideo();
+    if (!v) return;
+
+    async function onTap() {
+      const video = getVideo();
+      if (!video) return;
+
+      // Unmute + very low ambience volume (requires user gesture)
+      video.muted = false;
+      video.volume = 0.001;  // 2% ambience; adjust 0.01–0.03 as you like
+
+      // Try to play (gesture-backed); ignore errors silently
+      await video.play().catch(()=>{});
+
+      // If you have Media Session wiring, refresh the OS media state
+      if (typeof updateMediaSession === 'function') {
+        updateMediaSession();
+      }
+
+      // Remove handlers after first successful tap
+      win.removeEventListener('click', onTap);
+      win.removeEventListener('touchend', onTap);
+    }
+
+    // Attach once; any tap/click inside the karaoke window qualifies
+    win.addEventListener('click', onTap, { once: true });
+    win.addEventListener('touchend', onTap, { once: true, passive: true });
+  }
+
+  // Try to arm immediately
+  armGestureOnce();
+
+  // If your video is appended later, watch the DOM and arm when it appears
+  const mo = new MutationObserver(() => {
+    if (getVideo()) {
+      armGestureOnce();
+      mo.disconnect(); // done; no need to keep watching
+    }
+  });
+  mo.observe(win, { childList: true, subtree: true });
 })();
 </script>
 </body>
