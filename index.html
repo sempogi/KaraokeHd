@@ -524,6 +524,179 @@ SOFTWARE.
   body.audio-only #top { gap: 8px; }
 }
 </style>
+ 
+<style>
+/* === Do NOT touch #winKaro positioning; keep your centering/drag logic === */
+
+/* Body manages text layout and video crop (video isn't inside .winBody) */
+#winKaro .winBody {
+  position: relative;
+  overflow: hidden; /* OK for lyrics area; controls are anchored to window */
+}
+
+/* Only when video background is ON */
+#winKaro.karoHasBg .winBody {
+  background: transparent; /* reveal video; your static color shows when OFF */
+}
+
+/* === Full-window background video (anchors to #winKaro) === */
+#winKaro .karoBgVideo {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  object-fit: cover;           /* fills w/o distortion; crops instead of bands */
+  z-index: 0;
+  pointer-events: none;        /* never blocks clicks */
+  opacity: 1;
+  transition: opacity 250ms ease;
+}
+
+/* Contrast overlay above video (covers whole window) */
+#winKaro .karoOverlay {
+  position: absolute;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background: rgba(0,0,0,0.25);
+  z-index: 1;
+  pointer-events: none;
+}
+
+/* Header + lyrics above overlay/video */
+#winKaro .winHeader { position: relative; z-index: 2; }
+#winKaro #karoCurr,
+#winKaro #karoNext {
+  position: relative;
+  z-index: 2;
+  color: #fff;
+  text-shadow: 0 2px 6px rgba(0,0,0,0.75);
+  padding: 10px 12px;
+  line-height: 1.4;
+}
+#winKaro #karoNext { opacity: 0.8; }
+
+/* === Controls anchored to the whole window (avoid .winBody clipping) === */
+#winKaro .karoPL {
+  position: absolute;
+  z-index: 4;                 /* above header/lyrics */
+  left: 8px;
+  right: 8px;
+  bottom: 8px;                /* dock at bottom of the window */
+  background: rgba(0,0,0,0.35);
+  color: #fff;
+  padding: 8px;
+  border-radius: 6px;
+  font-size: 11px;
+}
+#winKaro .karoPL.hidden { display: none !important; }
+
+#winKaro .karoPLRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+}
+
+#winKaro .karoPLList {
+  margin: 6px 0 0 0;
+  padding-left: 18px;
+  /* Adaptive height so the list doesn't feel “clipped” */
+  max-height: min(40vh, 320px);
+  overflow: auto;
+}
+#winKaro:fullscreen .karoPLList,
+#winKaro:-webkit-full-screen .karoPLList {
+  max-height: min(60vh, 480px);
+}
+
+#winKaro .karoPLList li {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin: 2px 0;
+}
+#winKaro .karoPLList .idx { width: 1.5em; text-align: right; opacity: 0.7; }
+#winKaro .karoPLList .name { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#winKaro .karoPLList .dur { opacity: 0.7; }
+#winKaro .karoPLList .now { color: #0ff; }
+
+#winKaro .karoPLStatus { margin-top: 6px; opacity: 0.85; }
+
+/* === Simple in-window settings button (top-right) === */
+#winKaro .karoSimpleBtn {
+  position: absolute;
+  z-index: 4;
+  top: 8px;
+  right: 8px;
+  width: 30px;
+  height: 30px;
+  border-radius: 999px;
+  border: none;
+  background: rgba(0,0,0,0.6);
+  color: #fff;
+  font-size: 16px;
+  line-height: 30px;
+  text-align: center;
+  cursor: pointer;
+  user-select: none;
+}
+#winKaro .karoSimpleBtn:hover { background: rgba(0,0,0,0.75); }
+#winKaro .karoSimpleBtn:active { transform: scale(0.98); }
+
+/* Mini settings panel (auto-hide) */
+#winKaro .karoMiniPanel {
+  position: absolute;
+  z-index: 4;
+  top: 46px;                   /* just below the button */
+  right: 8px;
+  background: rgba(0,0,0,0.65);
+  color: #fff;
+  padding: 8px 10px;
+  border-radius: 8px;
+  font-size: 12px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.35);
+  display: none;
+}
+#winKaro .karoMiniPanel .row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 4px 0;
+}
+
+/* Safety: hide any native media controls */
+#winKaro .karoBgVideo::-webkit-media-controls { display: none !important; }
+#winKaro .karoBgVideo::-moz-media-controls { display: none !important; }
+
+/* === Fullscreen handling (use ⛶ on #winKaro) === */
+#winKaro:fullscreen,
+#winKaro:-webkit-full-screen {
+  width: 100vw !important;
+  height: 100vh !important;
+  max-width: 100vw !important;
+  max-height: 100vh !important;
+  left: 0 !important;
+  top: 0 !important;
+  margin: 0 !important;
+  transform: none !important;  /* avoid double centering in fullscreen */
+}
+/* Video stays at the very back */
+#winKaro .karoBgVideo {
+  z-index: 0 !important;
+}
+
+/* Overlay slightly above video */
+#winKaro .karoOverlay {
+  z-index: 1 !important;
+}
+
+/* Lyrics and countdown above everything */
+#winKaro .winHeader,
+#winKaro #karoCurr,
+#winKaro #karoNext,
+#karoStartRowDynamic { /* your big countdown row */
+  z-index: 2 !important;
+  position: relative; /* ensure stacking context */
+}
+</style>
 
 </head>
 <body class="density-ultra">
@@ -920,9 +1093,32 @@ pianoLite: '🎹', deepBass: '🧱', guitar: '🎸', drumLite: '🥁', triangle:
 function instSymbol(name) {
 return INST_SYM[name] || '◦';
 }
+ 
+// Simple 16-channel fallback (0..15). Edit values to your taste.
+// Keep ch 9 = 'drumLite' for GM drums.
+const CH_TO_INST = [
+  'pianoLite', // ch 0
+  'deepBass',  // ch 1
+  'guitar',    // ch 2
+  'square',    // ch 3
+  'triangle',  // ch 4
+  'triangle',  // ch 5
+  'square',    // ch 6
+  'saw',       // ch 7
+  'square',    // ch 8
+  'drumLite',  // ch 9  (GM drums)
+  'saw',       // ch 10
+  'square',    // ch 11
+  'triangle',  // ch 12
+  'saw',       // ch 13
+  'square',    // ch 14
+  'pianoLite'  // ch 15
+];
+
 function chanFallbackInst(ch) {
-if (ch === 9) return 'drumLite'; if (ch === 0) return 'pianoLite'; if (ch === 1 || ch === 3) return 'deepBass'; if (ch === 5 || ch === 6) return 'triangle'; if (ch >= 10 && ch <= 15) return 'square'; return 'saw';
+  return CH_TO_INST[ch] ?? 'pianoLite';
 }
+
 
 let audioCtx = null; let masterIn = null; let masterOut = null; let transport = null; let hpf = null; let notch = null; let clip = null; let analyser = null;
 let mediaDest = null; let mediaRecorder = null; let recChunks = [];
@@ -1170,7 +1366,9 @@ bar.style.height = h+'%'; bar._h = h;
 } refreshMixerCounters();
 }
 
+//
 
+    
 function bindUI() {
     document.getElementById('btnClearLog').addEventListener('click', () => {
   clearStatusLog();
@@ -1458,6 +1656,9 @@ document.addEventListener('DOMContentLoaded', bindUI);
 } else {
 bindUI();
 }
+
+
+
 
 function applySavedWindows() {
 if (!settings.windows) return; for (const id in settings.windows) {
@@ -2310,6 +2511,25 @@ st.inst = desired;
 }
 }
 
+// Neutral placeholders are considered "not yet assigned"
+const PLACEHOLDERS = new Set(['triangle', 'square', 'saw']);
+
+// Manual/assigned → GM Program → Channel fallback (only when neutral and no program)
+function resolveInstrument(ch) {
+  const st = channels[ch];
+  if (!st) return 'triangle'; // safety
+
+  // 1) Manual / already-concrete instrument wins
+  if (st.inst && !PLACEHOLDERS.has(st.inst)) return st.inst;
+
+  // 2) GM Program mapping (if present)
+  if (st.prog != null) return gmToInst(st.prog, palette);
+
+  // 3) Passive channel fallback (only when neutral / no program)
+  return chanFallbackInst(ch);
+}
+ 
+
 function dispatchMidi(ev, when) {
   const ch = (ev.ch | 0) || 0;
   const st = channels[ch];
@@ -2335,7 +2555,7 @@ function dispatchMidi(ev, when) {
         chSeen[ch] = true;
 
         channels[ch].lastNote = midiToName(note);
-        maybeAutoAssign(ch);
+        
         if (titleBadges && titleBadges[ch]) {
           titleBadges[ch].textContent = instSymbol(channels[ch].inst);
         }
@@ -2517,6 +2737,7 @@ function dispatchMidi(ev, when) {
   }
 }
 
+
 function scheduleStop(ch, note, tStop) {
 const reg = stopRegistry[ch].get(note); if (reg && reg.stop) {
 try {
@@ -2526,7 +2747,7 @@ reg.stop(tStop);
 }
 
 function simpleVoiceDispatch(ch, note, vel, when) {
-const st = channels[ch]; const inst = st.inst || (useTriangle?'triangle': 'saw'); if (inst === 'pianoLite') return pianoLiteVoice(ch, note, vel, when); if (inst === 'deepBass') return deepBassVoice(ch, note, vel, when); if (inst === 'guitar') return guitarLiteVoice(ch, note, vel, when); return simpleVoice(ch, note, vel, when);
+const st = channels[ch]; const inst = st.inst || (useTriangle?'triangle': 'saw'); if (inst === 'pianoLite') return pianoLiteVoice(ch, note, vel, when); if (inst === 'deepBass') return fretlessBassVoice(ch, note, vel, when); if (inst === 'guitar') return guitarLiteVoice(ch, note, vel, when); return simpleVoice(ch, note, vel, when);
 }
 function midiToName(m) {
 const names = ['C',
@@ -2548,14 +2769,147 @@ node, stopAt, ch, gain
 });
 }
 
-function simpleVoice(ch, note, vel, when) {
-const st = channels[ch]; const v = Math.max(1, vel)/127; let f = midiToFreq(note)*Math.pow(2, (st.bend || 0)/12); f *= globalDetuneRatio; const inst = st.inst || (useTriangle?'triangle': 'saw'); let o = audioCtx.createOscillator(); let amp = audioCtx.createGain(); const g = amp.gain; o.type = (inst === 'triangle' || inst === 'triangle_soft')? 'triangle': (inst === 'square'? 'square': 'sawtooth'); o.frequency.value = f; const bp = audioCtx.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = 1200+900*v; bp.Q.value = 0.8; const dc = audioCtx.createBiquadFilter(); dc.type = 'highpass'; dc.frequency.value = 12; dc.Q.value = 0.707; g.cancelScheduledValues(when); g.setValueAtTime(0.00012, when); g.linearRampToValueAtTime(v, when+ENV_ATTACK); const dest = st.pan? st.pan: (st.gain || masterIn); o.connect(bp).connect(dc); dc.connect(amp); amp.connect(dest); o.start(when); const plannedStop = when+ENV_RELEASE+0.80; stopRegistry[ch].set(note, {
-stop: (tStop)=> {
-try {
-g.cancelScheduledValues(tStop); g.setValueAtTime(g.value, tStop); g.linearRampToValueAtTime(0.00012, tStop+ENV_RELEASE); o.stop(Math.max(tStop+ENV_RELEASE+0.02, when+ENV_RELEASE+0.02));
-}catch(e) {}
+// instrument segment here
+
+// === VOICE HELPERS (shared, small, safe) ===================================
+
+// Floors: prevents denormals; exponential ramps need >0
+const MIN_FLOOR = 0.00012;      // matches your global usage
+const SAFE_PAD_MS = 0.002;      // micro-scheduling guard
+
+// Small vel curve curry (optional; consistent across voices)
+function velCurve(vel) {
+  const vlin = Math.max(1, vel) / 127;
+  return Math.pow(vlin, 0.90);  // gentle curve; use 0.85 for drums
 }
-}); trackVoice(o, plannedStop, ch, g);
+
+// Guard start-time against "start now" crackles (mobile‑friendly)
+function guardStartTime(when) {
+  try {
+    const now = audioCtx?.currentTime ?? 0;
+    return (when < now + SAFE_PAD_MS) ? now + SAFE_PAD_MS : when;
+  } catch(_) { return when; }
+}
+
+// Envelope scheduling (exponential where possible for smoothness)
+function applyADSR(gainParam, t0, aMs, dMs, sustain, rMs) {
+  const tA = t0 + (aMs || 0);
+  const tD = tA + (dMs || 0);
+  // Attack
+  gainParam.cancelScheduledValues(t0);
+  gainParam.setValueAtTime(MIN_FLOOR, t0);
+  gainParam.exponentialRampToValueAtTime(Math.max(MIN_FLOOR, sustain), tA);
+  // Decay to sustain (if sustain < peak; you can set peak == sustain to skip)
+  gainParam.exponentialRampToValueAtTime(Math.max(MIN_FLOOR, sustain), tD);
+  // (Release applied in stop function)
+}
+
+// Gentle release (avoid pops); uses exponential down to MIN_FLOOR
+function applyRelease(gainParam, tStop, rMs) {
+  const tEnd = tStop + (rMs || 0.18);
+  gainParam.cancelScheduledValues(tStop);
+  gainParam.setValueAtTime(Math.max(MIN_FLOOR, gainParam.value || MIN_FLOOR), tStop);
+  gainParam.exponentialRampToValueAtTime(MIN_FLOOR, tEnd);
+  return tEnd;
+}
+
+// Connect chain helper (readable wiring)
+function chain() {
+  for (let i = 0; i < arguments.length - 1; i++) {
+    try { arguments[i].connect(arguments[i+1]); } catch(_) {}
+  }
+  return arguments[arguments.length - 1];
+}
+
+// Shared noise buffer cache (reuses buffers by key: 'hammer_10ms', 'hat_80ms', etc.)
+const __noiseCache = new Map();
+function getNoiseBuffer(key, sr, durMs, correlation = 0.12) {
+  const tag = `${key}:${sr}:${durMs}:${correlation}`;
+  const found = __noiseCache.get(tag);
+  if (found) return found;
+
+  const dur = Math.max(1, Math.floor(sr * (durMs / 1000)));
+  const buf = audioCtx.createBuffer(1, dur, sr);
+  const d = buf.getChannelData(0);
+  for (let i = 0; i < dur; i++) {
+    const r = Math.random() * 2 - 1;
+    d[i] = (i > 0 ? d[i - 1] * correlation + r * (1 - correlation) : r);
+  }
+  __noiseCache.set(tag, buf);
+  return buf;
+}
+
+// Smooth choke for playing BufferSource or Oscillator
+function chokeSmooth(src, when, relMs = 18 /*ms*/) {
+  try {
+    const t0 = guardStartTime(when);
+    // If there's a gain before dest, try an exponential down; else stop quickly
+    // NOTE: Most of your cached paths use Gain; if not accessible, stop with small delay.
+    if (src && src.stop) src.stop(t0 + (relMs/1000));
+    src.disconnect?.();
+  } catch(_) {}
+}
+function simpleVoice(ch, note, vel, when) {
+  const st = channels[ch];
+  const v  = velCurve(vel);                     // gentle velocity curve
+  let f    = midiToFreq(note) * Math.pow(2, (st.bend || 0)/12) * globalDetuneRatio;
+
+  // Micro guard
+  when = guardStartTime(when);
+
+  const inst = st.inst || (useTriangle ? 'triangle' : 'saw');
+  const o    = audioCtx.createOscillator();
+  const amp  = audioCtx.createGain();
+  const g    = amp.gain;
+
+  // Wave selection (respect your current mapping)
+  o.type = (inst === 'triangle' || inst === 'triangle_soft') ? 'triangle'
+        : (inst === 'square'   ? 'square'   : 'sawtooth');
+  o.frequency.value = f;
+
+  // Filters: center BP relative to note (timbre follows pitch)
+  const bp = audioCtx.createBiquadFilter();
+  bp.type = 'bandpass';
+  bp.Q.value = 0.9;
+  bp.frequency.value = Math.max(180, Math.min(6000, f * 4));  // dynamic center
+
+  const dc = audioCtx.createBiquadFilter();
+  dc.type = 'highpass';
+  dc.frequency.value = 18;           // small bump from 12Hz
+  dc.Q.value = 0.707;
+
+  // Optional stereo pan (low CPU, only if supported)
+  const dest = st.pan ? st.pan : (st.gain || masterIn);
+  const panOk = !!audioCtx.createStereoPanner;
+  const pan = panOk ? audioCtx.createStereoPanner() : null;
+  if (pan) {
+    // Tiny random spread per note (±0.12)
+    pan.pan.value = (Math.random() * 0.24) - 0.12;
+  }
+
+  // Envelope: Attack/Decay; Release at stop
+  applyADSR(g, when, /*attack*/ 10/1000, /*decay*/ 120/1000, /*sustain*/ v);
+
+  // Wiring
+  if (pan) chain(o, bp, dc, amp, pan, dest);
+  else     chain(o, bp, dc, amp, dest);
+
+  // Start
+  o.start(when);
+
+  // Planned stop (musical)
+  const plannedStop = when + ENV_RELEASE + 0.80;
+
+  stopRegistry[ch].set(note, {
+    stop: (tStop) => {
+      // Smooth release; hard stop after release time
+      const hardStop = applyRelease(g, tStop, /*release*/ ENV_RELEASE);
+      try { o.stop(Math.max(hardStop + 0.02, when + ENV_RELEASE + 0.02)); } catch(_) {}
+    }
+  });
+
+  // Tracking for watchdog
+  trackVoice(o, plannedStop, ch, g);
 }
 
 function pianoLiteVoice(ch, note, vel, when) {
@@ -2631,11 +2985,7 @@ function pianoLiteVoice(ch, note, vel, when) {
   // Hammer/transient noise (local buffer per note as in your design)
   const ns = audioCtx.createBufferSource();
   const sr = audioCtx.sampleRate;
-  const nlen = Math.floor(sr * 0.010);
-  const nbuf = audioCtx.createBuffer(1, nlen, sr);
-  const nd = nbuf.getChannelData(0);
-  for (let i = 0; i < nlen; i++) nd[i] = (Math.random() * 2 - 1);
-  ns.buffer = nbuf;
+  ns.buffer = getNoiseBuffer('hammer_10ms', sr, 10, 0.10);
 
   const nh = audioCtx.createBiquadFilter();
   nh.type = 'highpass';
@@ -2698,29 +3048,56 @@ function pianoLiteVoice(ch, note, vel, when) {
   trackVoice(o4, when + 1.2, ch, g);
   trackVoice(ns, when + 0.10, ch, ng.gain);
 }
-
 function deepBassVoice(ch, note, vel, when) {
   const st = channels[ch];
-  const v = Math.max(1, vel) / 127;
+  const vlin = Math.max(1, vel) / 127;
+
+  // Micro scheduling guard to avoid "start-now" crackles (esp. mobile)
+  if (when < audioCtx.currentTime + 0.002) {
+    when = audioCtx.currentTime + 0.002;
+  }
 
   // Base frequency with pitch bend + global detune
   let f = midiToFreq(note) * Math.pow(2, (st.bend || 0) / 12);
   f *= globalDetuneRatio;
 
-  // GAIN ENVELOPE (slightly smoothed)
+  // === Voice bus gain ===
   const mix = audioCtx.createGain();
   const g = mix.gain;
-  g.setValueAtTime(0.00012, when);
-  g.linearRampToValueAtTime(v * 0.92, when + 0.008);   // gentler attack
-  g.linearRampToValueAtTime(v * 0.72, when + 0.140);   // decay to sustain-ish
+  const MIN = 0.00012;          // safe floor
 
-  // LOWPASS (limit highs a bit more than before)
-  const lp = audioCtx.createBiquadFilter();
-  lp.type = 'lowpass';
-  lp.frequency.setValueAtTime(350 + 700 * v, when);    // tighter top-end
-  lp.Q.value = 0.7;
+  // Tiny pre-attack reduces "thump hash" on sub hits
+  // Attack to ~0.92*vlin, decay to ~0.72*vlin
+  g.setValueAtTime(MIN, when);
+  g.linearRampToValueAtTime(0.92 * vlin, when + 0.004);    // shorter pre-attack
+  g.linearRampToValueAtTime(0.72 * vlin, when + 0.120);
 
-  // BODY + SUB
+  // === Tone shaping ===
+  // Low-pass first (limit highs)
+  const lpPre = audioCtx.createBiquadFilter();
+  lpPre.type = 'lowpass';
+  lpPre.frequency.setValueAtTime(350 + 700 * vlin, when);
+  lpPre.Q.value = 0.7;
+
+  // DC blocker BEFORE waveshaper (prevents bias from being clipped)
+  const dcPre = audioCtx.createBiquadFilter();
+  dcPre.type = 'highpass';
+  dcPre.frequency.setValueAtTime(30, when); // slightly higher than 28
+  dcPre.Q.value = 0.707;
+
+  // Soft saturation (lower drive, optional velocity gate)
+  const drive = audioCtx.createWaveShaper();
+  const driveAmt = (vlin < 0.12) ? 0.0 : 0.64;   // disable color at very low vel
+  drive.curve = makeSoftClipCurve(driveAmt);
+  drive.oversample = '4x';
+
+  // Post-clip LPF to tame HF added by saturation
+  const lpPost = audioCtx.createBiquadFilter();
+  lpPost.type = 'lowpass';
+  lpPost.frequency.setValueAtTime(1200, when);   // conservative top end for bass
+  lpPost.Q.value = 0.6;
+
+  // === Oscillators ===
   const oBody = audioCtx.createOscillator();
   oBody.type = 'triangle';
   oBody.frequency.setValueAtTime(f, when);
@@ -2729,27 +3106,15 @@ function deepBassVoice(ch, note, vel, when) {
   oSub.type = 'sine';
   oSub.frequency.setValueAtTime(f / 2, when);
 
-  const gBody = audioCtx.createGain();
-  gBody.gain.value = 0.65;
+  const gBody = audioCtx.createGain(); gBody.gain.value = 0.62;
+  const gSub  = audioCtx.createGain(); gSub.gain.value  = 0.88;
 
-  const gSub = audioCtx.createGain();
-  gSub.gain.value = 0.85;
+  // === Patch wiring ===
+  // Partials -> LP (pre) -> DC (pre) -> drive -> LP (post) -> mix
+  oBody.connect(gBody).connect(lpPre);
+  oSub .connect(gSub ).connect(lpPre);
 
-  // Soft saturation (reduced drive)
-  const drive = audioCtx.createWaveShaper();
-  drive.curve = makeSoftClipCurve(0.68); // lower than 0.82 to reduce hiss emphasis
-  drive.oversample = '4x';
-
-  // DC blocker (raise freq a bit)
-  const dc = audioCtx.createBiquadFilter();
-  dc.type = 'highpass';
-  dc.frequency.setValueAtTime(28, when); // 24–30 Hz works well; pick 28
-  dc.Q.value = 0.707;
-
-  // Patch wiring
-  oBody.connect(gBody).connect(lp);
-  oSub .connect(gSub).connect(lp);
-  lp.connect(drive).connect(dc).connect(mix);
+  lpPre.connect(dcPre).connect(drive).connect(lpPost).connect(mix);
 
   // Destination (respect pan chain if present)
   const dest = st.pan ? st.pan : (st.gain || masterIn);
@@ -2759,27 +3124,27 @@ function deepBassVoice(ch, note, vel, when) {
   oBody.start(when);
   oSub.start(when);
 
-  // Stop
+  // Stop (smooth exponential into floor, no readback of g.value)
   const stopFn = (tStop) => {
     try {
+      const rel = 0.180;
       g.cancelScheduledValues(tStop);
-      g.setValueAtTime(g.value, tStop);
-      g.linearRampToValueAtTime(0.00012, tStop + 0.180);
+      g.setValueAtTime(Math.max(MIN, 0.001), tStop);  // fixed small start for release
+      g.exponentialRampToValueAtTime(MIN, tStop + rel);
 
-      const minStopBody = Math.max(tStop + 0.200, when + 0.200);
-      const minStopSub  = Math.max(tStop + 0.200, when + 0.200);
-
-      oBody.stop(minStopBody);
-      oSub.stop(minStopSub);
+      const minStop = Math.max(tStop + rel + 0.020, when + 0.200);
+      oBody.stop(minStop);
+      oSub.stop(minStop);
     } catch (e) {}
   };
 
   stopRegistry[ch].set(note, { stop: stopFn });
 
-  // Housekeeping (if you use these for auto cleanup)
+  // Tracking (unchanged)
   trackVoice(oBody, when + 0.90, ch, g);
   trackVoice(oSub,  when + 0.90, ch, g);
 }
+
 function fretlessBassVoice(ch, note, vel, when) {
   const st = channels[ch];
   const v = Math.max(1, vel) / 127;
@@ -3331,13 +3696,10 @@ if (note === 38 && vel >= 110) {
   // === HI-HATS: 42 closed / 46 open — with choke logic ===
   if (note === 42 || note === 46) {
     // Choke any ringing open hat when closed hat is triggered
-    if (note === 42 && hiHatRegistry.open) {
-      try {
-        hiHatRegistry.open.stop(when);
-        hiHatRegistry.open.disconnect();
-      } catch (_) {}
-      hiHatRegistry.open = null;
-    }
+   if (note === 42 && hiHatRegistry.open) {
+  chokeSmooth(hiHatRegistry.open, when, 18 /*ms*/);
+  hiHatRegistry.open = null;
+}
 
     const dur = (note === 46 ? Math.max(minDur, 0.32) : Math.max(minDur, 0.16));
     const sr = audioCtx.sampleRate;
@@ -3830,6 +4192,8 @@ if (note === 80 || note === 81) {
   });
   trackVoice(osc, stopAt, ch, g.gain);
 }
+
+// instrument ends here
  
 
 function voiceWatchdogLoop() {
@@ -4920,8 +5284,6 @@ if(btn) btn.addEventListener('click', centerKaroWindow);
 
 
 
-
-
 <script>
 (() => {
 const $ = (sel) => document.querySelector(sel);
@@ -5449,6 +5811,344 @@ function rebuildLyricSourceOptions(metaEvs) {
   lyrics.source = resolved;
   try { persistSettings(); } catch(_) {}
 }
+</script>
+
+
+
+ <script>
+(function () {
+  const win = document.getElementById('winKaro');
+  const body = win?.querySelector('.winBody');
+  const btnFS = win?.querySelector('#btnKaroFS');
+  if (!win || !body) return;
+
+  /* ========= Simple in-window settings button + mini panel (APPENDED TO WINDOW) ========= */
+  const simpleBtn = document.createElement('button');
+  simpleBtn.className = 'karoSimpleBtn';
+  simpleBtn.title = 'Settings';
+  simpleBtn.textContent = '⚙';
+  win.appendChild(simpleBtn);
+
+  const miniPanel = document.createElement('div');
+  miniPanel.className = 'karoMiniPanel';
+  miniPanel.innerHTML = `
+    <div class="row">
+      <label><input type="checkbox" id="mpShowControls"> Show Controls</label>
+    </div>
+    <div class="row">
+      <label><input type="checkbox" id="mpBgEnabled"> Video Background</label>
+    </div>
+  `;
+  win.appendChild(miniPanel);
+
+  const mpShowControls = miniPanel.querySelector('#mpShowControls');
+  const mpBgEnabled    = miniPanel.querySelector('#mpBgEnabled');
+
+  let autoHideTimer = null;
+  function showPanel() {
+    miniPanel.style.display = 'block';
+    resetAutoHide();
+  }
+  function hidePanel() {
+    miniPanel.style.display = 'none';
+    clearTimeout(autoHideTimer);
+  }
+  function resetAutoHide() {
+    clearTimeout(autoHideTimer);
+    autoHideTimer = setTimeout(() => {
+      miniPanel.style.display = 'none';
+    }, 4000);
+  }
+  simpleBtn.addEventListener('click', () => {
+    if (miniPanel.style.display === 'block') hidePanel();
+    else showPanel();
+  });
+  miniPanel.addEventListener('mousemove', resetAutoHide);
+  miniPanel.addEventListener('touchmove', resetAutoHide, { passive: true });
+
+  /* ========= Video background & overlay (APPENDED TO WINDOW) ========= */
+  let video = null, overlay = null;
+
+  function ensureVideo() {
+    if (video) return;
+    video = document.createElement('video');
+    video.id = 'karoBgVideo';
+    video.className = 'karoBgVideo';
+    video.autoplay = true;
+    video.loop = true;
+    video.muted = true;
+    video.playsInline = true;    // mobile-safe autoplay
+    video.preload = 'auto';
+    win.appendChild(video);      // anchor to whole window for full coverage
+
+    overlay = document.createElement('div');
+    overlay.className = 'karoOverlay';
+    win.appendChild(overlay);
+
+    // Auto advance background when a video ends
+    video.addEventListener('ended', next);
+
+    // Status updates
+    video.addEventListener('play', () => {
+      if (statusEl) {
+        statusEl.textContent = pl.length
+          ? `Playing ${idx+1}/${pl.length}: ${pl[idx]?.name || ''}`
+          : 'Playing';
+      }
+    });
+    video.addEventListener('pause', () => { if (statusEl) statusEl.textContent = 'Paused'; });
+  }
+
+  /* ========= Playlist controls (APPENDED TO WINDOW to avoid .winBody clipping) ========= */
+  let plWrap = null;
+  let input = null, listEl = null, statusEl = null;
+  let btnPrev = null, btnNext = null, btnClear = null, chkLoop = null, chkShuffle = null;
+
+  function ensureControls() {
+    if (plWrap) return;
+    plWrap = document.createElement('div');
+    plWrap.className = 'karoPL hidden';
+    plWrap.innerHTML = `
+      <div class="karoPLRow">
+        <label for="karoVideoFiles">Browse:</label>
+        <input type="file" id="karoVideoFiles" accept="video/*" multiple>
+        <button id="plPrev" class="btn">Prev</button>
+        <button id="plNext" class="btn">Next</button>
+        <label class="toggle"><input type="checkbox" id="plLoop"> Loop</label>
+        <label class="toggle"><input type="checkbox" id="plShuffle"> Shuffle</label>
+        <button id="plClear" class="btn">Clear</button>
+      </div>
+      <ol id="plList" class="karoPLList" aria-live="polite" aria-label="Playlist"></ol>
+      <div id="plStatus" class="karoPLStatus" role="status" aria-live="polite"></div>
+    `;
+    win.appendChild(plWrap); // append to window (not .winBody)
+
+    input      = plWrap.querySelector('#karoVideoFiles');
+    listEl     = plWrap.querySelector('#plList');
+    statusEl   = plWrap.querySelector('#plStatus');
+    btnPrev    = plWrap.querySelector('#plPrev');
+    btnNext    = plWrap.querySelector('#plNext');
+    btnClear   = plWrap.querySelector('#plClear');
+    chkLoop    = plWrap.querySelector('#plLoop');
+    chkShuffle = plWrap.querySelector('#plShuffle');
+
+    input.addEventListener('change', onFilesSelected);
+    btnNext.addEventListener('click', next);
+    btnPrev.addEventListener('click', prev);
+    btnClear.addEventListener('click', clearPlaylist);
+
+    // Keep panel alive while user is interacting with the playlist
+    ['mousemove', 'mouseover', 'wheel', 'touchmove', 'click'].forEach(evt => {
+      plWrap.addEventListener(evt, () => { resetAutoHide(); }, { passive: true });
+    });
+
+    renderList();
+  }
+
+  function setControlsVisible(visible) {
+    ensureControls();
+    // Toggle class and inline style to defeat any stale CSS
+    plWrap.classList.toggle('hidden', !visible);
+    plWrap.style.display = visible ? '' : 'none';
+    // Re-append to window to bump stacking order (in case other nodes were added later)
+    win.appendChild(plWrap);
+    mpShowControls.checked = visible;
+    resetAutoHide();
+  }
+
+  /* ========= Background video toggle (respects your static color) ========= */
+  function setBackgroundEnabled(enabled) {
+    if (enabled) {
+      win.classList.add('karoHasBg');  // CSS applies only when BG is ON
+      ensureVideo();
+      video.style.display = '';
+      overlay.style.display = '';
+      // If a playlist item is selected, start it
+      if (idx >= 0 && pl[idx]) { fadeTo(pl[idx].url); }
+    } else {
+      win.classList.remove('karoHasBg'); // your static color shows now
+      if (video) {
+        video.pause();
+        video.removeAttribute('src');
+        video.load();
+        video.style.display = 'none';
+      }
+      if (overlay) overlay.style.display = 'none';
+    }
+    // Re-append to bump stacking order above video
+    win.appendChild(simpleBtn);
+    win.appendChild(miniPanel);
+    mpBgEnabled.checked = enabled;
+    resetAutoHide();
+  }
+
+  /* ========= Wire the checkboxes robustly ========= */
+  mpShowControls.addEventListener('change', (e) => {
+    setControlsVisible(e.target.checked);
+  });
+  mpBgEnabled.addEventListener('change', (e) => {
+    setBackgroundEnabled(e.target.checked);
+  });
+
+  /* ========= Playlist logic ========= */
+  let pl = [];      // [{ name, url, duration }]
+  let idx = -1;
+  let revoked = [];
+  const fadeMs = 250;
+
+  const fmt = s => isFinite(s) ? `${Math.floor(s/60)}:${String(Math.floor(s%60)).padStart(2,'0')}` : '--:--';
+
+  async function fadeTo(srcUrl) {
+    if (!video) return;
+    video.style.opacity = '0';
+    await new Promise(r => setTimeout(r, fadeMs));
+    video.src = srcUrl;
+    try { video.currentTime = 0; } catch {}
+    video.play().catch(() => {});
+    video.style.opacity = '1';
+  }
+
+  function playIndex(i) {
+    if (i < 0 || i >= pl.length) return;
+    idx = i;
+    if (win.classList.contains('karoHasBg')) fadeTo(pl[i].url);
+    renderList();
+  }
+
+  function next() {
+    if (!pl.length) return;
+    if (chkShuffle?.checked) {
+      let n;
+      if (pl.length === 1) n = 0;
+      else { do { n = Math.floor(Math.random() * pl.length); } while (n === idx); }
+      playIndex(n);
+      return;
+    }
+    const n = idx + 1;
+    if (n < pl.length) playIndex(n);
+    else if (chkLoop?.checked) playIndex(0);
+  }
+
+  function prev() {
+    if (!pl.length) return;
+    const p = idx - 1;
+    if (p >= 0) playIndex(p);
+    else if (chkLoop?.checked) playIndex(pl.length - 1);
+  }
+
+  async function onFilesSelected() {
+    const files = Array.from(this.files || []);
+    if (!files.length) return;
+
+    for (const f of files) {
+      const url = URL.createObjectURL(f);
+      revoked.push(url);
+      const item = { name: f.name, url, duration: NaN };
+
+      // Probe duration via temp video
+      const probe = document.createElement('video');
+      probe.preload = 'metadata';
+      probe.src = url;
+      await new Promise((res) => {
+        const ok = () => { item.duration = probe.duration; cleanup(); res(); };
+        const err = () => { cleanup(); res(); };
+        const cleanup = () => {
+          probe.removeEventListener('loadedmetadata', ok);
+          probe.removeEventListener('error', err);
+          probe.src = '';
+        };
+        probe.addEventListener('loadedmetadata', ok, { once: true });
+        probe.addEventListener('error', err, { once: true });
+      });
+
+      pl.push(item);
+    }
+
+    // Start first item if idle
+    if (idx < 0 && pl.length) playIndex(0);
+    renderList();
+    this.value = ''; // allow re-adding same files
+
+    // Optional: show controls and turn BG ON right after playlist creation
+    setControlsVisible(true);
+    setBackgroundEnabled(true);
+
+    resetAutoHide();
+  }
+
+  function clearPlaylist() {
+    if (video) {
+      video.pause();
+      video.removeAttribute('src');
+      video.load();
+    }
+    idx = -1;
+    for (const u of revoked) { try { URL.revokeObjectURL(u); } catch {} }
+    revoked = [];
+    pl = [];
+    renderList();
+    resetAutoHide();
+  }
+
+  function renderList() {
+    if (!listEl) return;
+    listEl.innerHTML = '';
+    pl.forEach((item, i) => {
+      const li = document.createElement('li');
+      const idxSpan = document.createElement('span');
+      idxSpan.className = 'idx';
+      idxSpan.textContent = i + 1;
+
+      const nameSpan = document.createElement('span');
+      nameSpan.className = 'name';
+      nameSpan.textContent = item.name;
+
+      const durSpan = document.createElement('span');
+      durSpan.className = 'dur';
+      durSpan.textContent = fmt(item.duration);
+
+      li.append(idxSpan, nameSpan, durSpan);
+      if (i === idx) li.classList.add('now');
+      li.addEventListener('click', () => playIndex(i));
+      listEl.appendChild(li);
+    });
+
+    if (statusEl) {
+      statusEl.textContent = pl.length
+        ? `Items: ${pl.length} • ${idx >= 0 ? `Selected ${idx+1}/${pl.length}` : 'Idle'}`
+        : 'Playlist empty';
+    }
+  }
+
+  /* ========= Fullscreen button wire-up (⛶ targets whole window) ========= */
+  if (btnFS) {
+    btnFS.addEventListener('click', async () => {
+      try {
+        if (!document.fullscreenElement) {
+          await win.requestFullscreen(); // full window; video covers fully
+          btnFS.setAttribute('aria-pressed', 'true');
+        } else {
+          await document.exitFullscreen();
+          btnFS.setAttribute('aria-pressed', 'false');
+        }
+      } catch (e) { console.error('Fullscreen error:', e); }
+    });
+    document.addEventListener('fullscreenchange', () => {
+      const pressed = !!document.fullscreenElement;
+      btnFS.setAttribute('aria-pressed', pressed ? 'true' : 'false');
+    });
+  }
+
+  /* ========= Pause BG when window hidden ========= */
+  const observer = new MutationObserver(() => {
+    const hidden = getComputedStyle(win).display === 'none' || win.hidden;
+    if (hidden && video) video.pause();
+  });
+  observer.observe(win, { attributes: true, attributeFilter: ['style', 'hidden'] });
+
+  /* ========= Initial state ========= */
+  miniPanel.style.display = 'none';
+})();
 </script>
 </body>
 </html>
