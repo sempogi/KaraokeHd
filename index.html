@@ -271,7 +271,7 @@ SOFTWARE.
     background: #10182a;
     color: #a7c4de;
     border-radius: 999px;
-    padding: 2px 6px;
+    padding: 4px 8px;
     font-size: 9px;
   }
   .readout {
@@ -288,17 +288,18 @@ SOFTWARE.
   #compBypassIndicator { font-weight:600; }
   .cmp-led {
     display:inline-block;
-    width:10px;
-    height:10px;
+    width:16px;
+    height:16px;
     border-radius:50%;
     background:#6b1f1f;
-    box-shadow:0 0 3px rgba(0,0,0,0.6) inset;
-    margin-right:8px;
+    box-shadow:0 0 4px rgba(0,0,0,0.8) inset;
+    margin-right:6px;
+    flex-shrink:0;
     vertical-align:middle;
   }
   .cmp-led.on {
     background:#2fe02f;
-    box-shadow:0 0 8px #2fe02f;
+    box-shadow:0 0 10px #2fe02f, inset 0 0 4px rgba(0,0,0,0.6);
   }
   .ctlV {
     display: flex;
