@@ -1,15 +1,27 @@
 # 🎤 KaraokeHD
 
+## 🔗 Live Demo
+
+[Click here to launch KaraokeHD](https://sempogi.github.io/KaraokeHd/index.html)
+
+<p align="center">
+  <a href="https://sempogi.github.io/KaraokeHd/index.html">
+    <img src="https://img.shields.io/badge/Open%20KaraokeHD-Click%20Here-brightgreen?style=for-the-badge" alt="Open KaraokeHD">
+  </a>
+</p>
+
+<h2 align="center">Live Preview</h2>
+<iframe src="https://sempogi.github.io/KaraokeHd/index.html" width="100%" height="600" style="border:1px solid #ccc;">
+</iframe>
+
+
+
 ![HTML5 Badge](https://img.shields.io/badge/HTML5-orange?logo=html5)
 ![Web Audio API Badge](https://img.shields.io/badge/Web%20Audio%20API-blue)
 ![License Badge](https://img.shields.io/badge/license-Custom-red)
 
 **KaraokeHD** is a **standalone, serverless HTML application** that runs directly in any modern browser. It provides a full karaoke experience with MIDI/KAR playback, real-time lyrics rendering, and optional video backgrounds—all powered by pure HTML and inline JavaScript.
-<p align="center">
-  https://sempogi.github.io/KaraokeHd/index.html
-    https://img.shields.io/badge/Open%20KaraokeHD-Click%20Here-brightgreen?style=for-the-badge
-  </a>
-</p>
+
 ---
 
 ## ✅ Features
@@ -60,8 +72,6 @@
 
 ### more
 ![...](others.jpg)
-
-
 
 ---
 
