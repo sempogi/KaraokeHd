@@ -107,7 +107,21 @@ This version was originally designed as a **healing frequency generator**, so so
 ## 📂 How to Use
 
 1. **Clone or Download** this repository.
-2. Open `index.html` in any modern browser.
+2. Recommended: serve files with a local HTTP server (required for some browser APIs).
+
+  Example (Python 3):
+
+```bash
+python -m http.server 8000
+```
+
+  Example (Node):
+
+```bash
+npx serve . -l 8000
+```
+
+  Then open http://localhost:8000/index.html in your browser. Opening via `file://` may disable features like Wake Lock, Media Session, and device font listing.
 3. Provide your own:
    - MIDI/KAR files
    - Background videos

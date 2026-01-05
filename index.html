@@ -33,6 +33,11 @@ SOFTWARE.
 <head>
     <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="KaraokeHD — standalone browser karaoke player with WebAudio-based synth, MIDI/KAR parser, lyrics and video backgrounds." />
+  <meta name="theme-color" content="#0f1420" />
+  <link rel="icon" href="/favicon.ico" />
+  <!-- Basic CSP: allows inline scripts/styles because this is a single-file app. Harden for production. -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; media-src 'self' blob:; connect-src 'self' blob:; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline';">
 <title>KaraokeHD</title>
 
 <style>
@@ -891,8 +896,6 @@ Retune detect: --
 </div>
 <button id="btnClearLog" class="btn" type="button" title="Clear status log">🧹 Clear Log</button>
 
-<!-- Make sure you have this somewhere in your layout -->
-<pre id="status" class="log"></pre>
 <div class="winBody">
 <pre id="status" class="log" role="status" aria-live="polite">Ready (v5.4b.1‑perf). Mixer DOM built once; per‑frame updates are meter bars + counters only. Mobile/desktop responsive tweaks applied. Recording + Solfeggio overlay + Master Retune + Continuous Play + Lyrics + Karaoke. Global error logging enabled. Settings persisted to localStorage. Karaoke window frame/header/body follow Karaoke BG (no bands). Bugfixes applied.</pre>
 </div>
@@ -5069,7 +5072,7 @@ if(!w) return false;
 const s=String(w.w || '').trim();
 if(!s) return false;
 if(s==='\u2420' || s==='␠') return false;
-if(/^<---karaokeHD--->$/.test(s)) return false;
+  if(/^<-{3}karaokeHD-{3}>$/.test(s)) return false;
 return true;
 }
 function getFirstHighlightSec(){
@@ -5918,13 +5921,13 @@ function rebuildLyricSourceOptions(metaEvs) {
         <label class="toggle"><input type="checkbox" id="plShuffle"> Shuffle</label>
         <button id="plClear" class="btn">Clear</button>
       </div>
-      <ol id="plList" class="karoPLList" aria-live="polite" aria-label="Playlist"></ol>
+      <ol id="karoVideoPlList" class="karoPLList" aria-live="polite" aria-label="Playlist"></ol>
       <div id="plStatus" class="karoPLStatus" role="status" aria-live="polite"></div>
     `;
     win.appendChild(plWrap); // append to window (not .winBody)
 
     input      = plWrap.querySelector('#karoVideoFiles');
-    listEl     = plWrap.querySelector('#plList');
+    listEl     = plWrap.querySelector('#karoVideoPlList');
     statusEl   = plWrap.querySelector('#plStatus');
     btnPrev    = plWrap.querySelector('#plPrev');
     btnNext    = plWrap.querySelector('#plNext');
@@ -6381,6 +6384,18 @@ function rebuildLyricSourceOptions(metaEvs) {
   });
   mo.observe(win, { childList: true, subtree: true });
 })();
+</script>
+<script>
+// Cleanup any uploaded font blob URL kept in sessionStorage when the page unloads
+window.addEventListener('unload', () => {
+  try {
+    const u = sessionStorage.getItem('karaoke.font.upload.sessionUrl');
+    if (u) {
+      try { URL.revokeObjectURL(u); } catch(_) {}
+      sessionStorage.removeItem('karaoke.font.upload.sessionUrl');
+    }
+  } catch (_) {}
+});
 </script>
 </body>
 </html>
