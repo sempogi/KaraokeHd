@@ -1,6 +1,6 @@
 ﻿<!--
-KARAOKE HD — WebAudio Engine + Custom MIDI Parser
-Copyright © 2026 Sem Sabiduria. All rights reserved.
+KARAOKE HD â€” WebAudio Engine + Custom MIDI Parser
+Copyright Â© 2026 Sem Sabiduria. All rights reserved.
 
 MIT License (with Non-Commercial Rider)
 
@@ -33,7 +33,7 @@ SOFTWARE.
 <head>
     <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="description" content="KaraokeHD — standalone browser karaoke player with WebAudio-based synth, MIDI/KAR parser, lyrics and video backgrounds." />
+  <meta name="description" content="KaraokeHD â€” standalone browser karaoke player with WebAudio-based synth, MIDI/KAR parser, lyrics and video backgrounds." />
   <meta name="theme-color" content="#0f1420" />
   <link rel="icon" href="/favicon.ico" />
   <!-- Basic CSP: allows inline scripts/styles because this is a single-file app. Harden for production. -->
@@ -493,7 +493,7 @@ SOFTWARE.
     border-radius: 0 !important;
   }
 
-  /* Countdown — chroma-safe styling */
+  /* Countdown â€” chroma-safe styling */
   #karoStartBigDynamic {
     color: #ffd84a !important;
     text-shadow: none !important;
@@ -515,7 +515,7 @@ SOFTWARE.
   .lyTok.done { opacity: 0.92; }
   .lyTok.active { color: var(--accent); }
 
-  /* Tiny color dots for Solf/Retune — no text */
+  /* Tiny color dots for Solf/Retune â€” no text */
   #solfDetect, #tuneDetect {
     display: inline-block;
     width: 10px; height: 10px;
@@ -560,7 +560,7 @@ SOFTWARE.
   body.audio-only #top { gap: 8px; }
 }
 </style>
- 
+Â 
 <style>
 /* === Do NOT touch #winKaro positioning; keep your centering/drag logic === */
 
@@ -634,7 +634,7 @@ SOFTWARE.
 #winKaro .karoPLList {
   margin: 6px 0 0 0;
   padding-left: 18px;
-  /* Adaptive height so the list doesn't feel “clipped” */
+  /* Adaptive height so the list doesn't feel â€œclippedâ€ */
   max-height: min(40vh, 320px);
   overflow: auto;
 }
@@ -702,7 +702,7 @@ SOFTWARE.
 #winKaro .karoBgVideo::-webkit-media-controls { display: none !important; }
 #winKaro .karoBgVideo::-moz-media-controls { display: none !important; }
 
-/* === Fullscreen handling (use ⛶ on #winKaro) === */
+/* === Fullscreen handling (use â›¶ on #winKaro) === */
 #winKaro:fullscreen,
 #winKaro:-webkit-full-screen {
   width: 100vw !important;
@@ -747,13 +747,13 @@ text-shadow: 0 0 12px rgba(243,18,96,0.8), 0 0 24px rgba(243,18,96,0.6);
 ">
 KaraokeHD
 </strong>
-<span style="color:#9fbad1; font-size:20px;"> — </span>
+<span style="color:#9fbad1; font-size:20px;"> â€” </span>
 <strong style="color:#39FF14; font-weight:900;">codex45</strong>
-<span style="color:#9fbad1; font-size:18px;"> (v5.4b.1‑perf)</span>
+<span style="color:#9fbad1; font-size:18px;"> (v5.4b.1â€‘perf)</span>
 </h1>
 
 <small id="hdrTagline" style="display:block; margin-top:6px; color:#9fbad1; font-size:10px;">
-Ultra‑Compact Mixer • Visualizer • Recording • Retune • Lyrics • Karaoke
+Ultraâ€‘Compact Mixer â€¢ Visualizer â€¢ Recording â€¢ Retune â€¢ Lyrics â€¢ Karaoke
 </small>
 
 <div id="nowPlaying" style="margin-top:10px; font-size:18px; font-weight:700;">
@@ -769,9 +769,9 @@ Ultra‑Compact Mixer • Visualizer • Recording • Retune • Lyrics • Kar
 <div id="top">
 <input id="midFiles" type="file" multiple accept=".mid,.kar" />
 <button id="btnInit" class="btn primary">Init</button>
-<button id="btnPlay" class="btn" disabled aria-label="Play">▶</button>
-<button id="btnStop" class="btn" disabled aria-label="Stop">⏹</button>
-<button id="btnPanic" class="btn danger" disabled aria-label="Panic">⛑</button>
+<button id="btnPlay" class="btn" disabled aria-label="Play">â–¶</button>
+<button id="btnStop" class="btn" disabled aria-label="Stop">â¹</button>
+<button id="btnPanic" class="btn danger" disabled aria-label="Panic">â›‘</button>
 
 <label>Assign
 <select id="autoAssign"><option value="1" selected>On</option><option value="0">Off</option></select>
@@ -786,23 +786,23 @@ Ultra‑Compact Mixer • Visualizer • Recording • Retune • Lyrics • Kar
 <select id="preset"><option value="Flat" selected>Flat</option><option value="Warm">Warm</option><option value="Bright">Bright</option><option value="Vocal">Vocal</option><option value="BassBoost">Bass+</option><option value="BassStrong">Bass++</option></select>
 </label>
 <label>Soft Synth <input id="softSynth" type="checkbox" /></label>
-<label>Anti‑Beep <input id="antiBeep" type="checkbox" checked /></label>
+<label>Antiâ€‘Beep <input id="antiBeep" type="checkbox" checked /></label>
 <label>Lim <input id="limStr" type="range" min="0.50" max="0.95" value="0.78" step="0.01" /></label>
 <label>Notch <select id="notch"><option value="0">Off</option><option value="50">50</option><option value="60" selected>60</option></select></label>
 
 <label>Density
 <select id="density"><option value="ultra" selected>Ultra</option><option value="compact">Compact</option><option value="normal">Normal</option></select>
 </label>
-<label>Fit‑16 <input id="fit16" type="checkbox" checked /></label>
+<label>Fitâ€‘16 <input id="fit16" type="checkbox" checked /></label>
 
 <!-- ADD: Audio-only toggle -->
-<label>Audio‑only <input id="audioOnly" type="checkbox" /></label>
+<label>Audioâ€‘only <input id="audioOnly" type="checkbox" /></label>
 
 <span style="display:flex;gap:6px;margin-left:8px">
-<button id="btnRecNow" class="btn">⏺ Rec Now</button>
-<button id="btnRecRestart" class="btn">⏺ Rec Restart</button>
-<button id="btnRecStop" class="btn" disabled>⏹ Stop Rec</button>
-<a id="recDownload" class="btn" style="display:none" download>⬇️ Save</a>
+<button id="btnRecNow" class="btn">âº Rec Now</button>
+<button id="btnRecRestart" class="btn">âº Rec Restart</button>
+<button id="btnRecStop" class="btn" disabled>â¹ Stop Rec</button>
+<a id="recDownload" class="btn" style="display:none" download>â¬‡ï¸ Save</a>
 </span>
 
 <span style="display:flex;gap:6px;margin-left:8px;flex-wrap:wrap">
@@ -811,15 +811,15 @@ Ultra‑Compact Mixer • Visualizer • Recording • Retune • Lyrics • Kar
 
 <label>Freq
 <select id="solfFreq">
-<option value="174">174 Hz – Foundation</option>
-<option value="285">285 Hz – Healing</option>
-<option value="396">396 Hz – Liberation</option>
-<option value="417">417 Hz – Change</option>
-<option value="528" selected>528 Hz – Transformation</option>
-<option value="639">639 Hz – Connection</option>
-<option value="741">741 Hz – Awakening</option>
-<option value="852">852 Hz – Intuition</option>
-<option value="963">963 Hz – Divine</option>
+<option value="174">174 Hz â€“ Foundation</option>
+<option value="285">285 Hz â€“ Healing</option>
+<option value="396">396 Hz â€“ Liberation</option>
+<option value="417">417 Hz â€“ Change</option>
+<option value="528" selected>528 Hz â€“ Transformation</option>
+<option value="639">639 Hz â€“ Connection</option>
+<option value="741">741 Hz â€“ Awakening</option>
+<option value="852">852 Hz â€“ Intuition</option>
+<option value="963">963 Hz â€“ Divine</option>
 </select>
 </label>
 <label>Level <input id="solfLevel"type="range" min="0" max="0.40" step="0.01" value="0.12" /></label>
@@ -831,16 +831,16 @@ Solf detect: --
 <label style="margin-left:12px">Retune Mix <input id="tuneEnable" type="checkbox" /></label>
 <label>Target
 <select id="tuneFreq">
-<option value="174">174 Hz – Foundation</option>
-<option value="285">285 Hz – Healing</option>
-<option value="396">396 Hz – Liberation</option>
-<option value="417">417 Hz – Change</option>
-<option value="440">440 Hz – Standard</option>
-<option value="528" selected>528 Hz – Transformation</option>
-<option value="639">639 Hz – Connection</option>
-<option value="741">741 Hz – Awakening</option>
-<option value="852">852 Hz – Intuition</option>
-<option value="963">963 Hz – Divine</option>
+<option value="174">174 Hz â€“ Foundation</option>
+<option value="285">285 Hz â€“ Healing</option>
+<option value="396">396 Hz â€“ Liberation</option>
+<option value="417">417 Hz â€“ Change</option>
+<option value="440">440 Hz â€“ Standard</option>
+<option value="528" selected>528 Hz â€“ Transformation</option>
+<option value="639">639 Hz â€“ Connection</option>
+<option value="741">741 Hz â€“ Awakening</option>
+<option value="852">852 Hz â€“ Intuition</option>
+<option value="963">963 Hz â€“ Divine</option>
 </select>
 </label>
 
@@ -860,32 +860,32 @@ Retune detect: --
 </span>
 
 <span style="margin-left:auto;display:flex;gap:6px">
-<button class="btn" onclick="toggleWin('winChannels')" aria-label="Mixer">🎚</button>
-<button class="btn" onclick="toggleWin('winEQ')" aria-label="EQ">🎛</button>
-<button class="btn" onclick="toggleWin('winPlaylist')" aria-label="Playlist">📜</button>
-<button class="btn" onclick="toggleWin('winLog')" aria-label="Log">🧾</button>
-<button class="btn" onclick="toggleWin('winLyrics')" aria-label="Lyrics">📖</button>
-<button class="btn" onclick="toggleWin('winKaro')" aria-label="Karaoke">🎤</button>
-<button class="btn" onclick="toggleWin('winKaroSettings')" aria-label="Karaoke Settings">⚙️🎤</button>
+<button class="btn" onclick="toggleWin('winChannels')" aria-label="Mixer">ðŸŽš</button>
+<button class="btn" onclick="toggleWin('winEQ')" aria-label="EQ">ðŸŽ›</button>
+<button class="btn" onclick="toggleWin('winPlaylist')" aria-label="Playlist">ðŸ“œ</button>
+<button class="btn" onclick="toggleWin('winLog')" aria-label="Log">ðŸ§¾</button>
+<button class="btn" onclick="toggleWin('winLyrics')" aria-label="Lyrics">ðŸ“–</button>
+<button class="btn" onclick="toggleWin('winKaro')" aria-label="Karaoke">ðŸŽ¤</button>
+<button class="btn" onclick="toggleWin('winKaroSettings')" aria-label="Karaoke Settings">âš™ï¸ðŸŽ¤</button>
 
 <button id="karoResetPos" class="btn" type="button" title="Karaoke window">
-⤢🎤
+â¤¢ðŸŽ¤
 </button>
 
 <!-- NEW: whole-page fullscreen -->
-<button id="btnPageFS" class="btn" aria-label="Full Screen" title="Full screen">⛶</button>
+<button id="btnPageFS" class="btn" aria-label="Full Screen" title="Full screen">â›¶</button>
 </span>
 </div>
 
 <div id="winChannels" class="floatWin" style="width:98vw;left:8px;" role="dialog" aria-modal="false" aria-labelledby="winChannelsTitle">
 <div class="winHeader">
-<strong id="winChannelsTitle">🎚 Mixer</strong><span class="winBtns"><button class="btn" onclick="toggleWin('winChannels')">✕</button></span>
+<strong id="winChannelsTitle">ðŸŽš Mixer</strong><span class="winBtns"><button class="btn" onclick="toggleWin('winChannels')">âœ•</button></span>
 </div>
 <div class="winBody">
 <div id="chToolbar" class="row" style="margin-bottom:6px;justify-content:space-between">
 <span class="chip" id="usedSummary">Used 0/16</span>
 <span class="chip" id="activeSummary">Now 0</span>
-<button id="btnResetUsed" class="btn">↺</button>
+<button id="btnResetUsed" class="btn">â†º</button>
 <button id="btnSmokeTest" class="btn" title="Run smoke test">Test</button>
 </div>
   <div style="display:flex;gap:8px;align-items:center;margin-bottom:6px">
@@ -929,7 +929,7 @@ Retune detect: --
 
 <div id="winEQ" class="floatWin" style="width:320px;" role="dialog" aria-modal="false" aria-labelledby="winEQTitle">
 <div class="winHeader">
-<strong id="winEQTitle">🎛 EQ</strong><span class="winBtns"><button class="btn" onclick="toggleWin('winEQ')">✕</button></span>
+<strong id="winEQTitle">ðŸŽ› EQ</strong><span class="winBtns"><button class="btn" onclick="toggleWin('winEQ')">âœ•</button></span>
 </div>
 <div class="winBody">
 <div class="row" style="flex-direction:column;gap:6px;font-size:10px">
@@ -943,14 +943,14 @@ Retune detect: --
 <label>4k<input id="eq10_7" type="range" min="-12" max="12" value="0" step="1" aria-label="4 kHz" /></label>
 <label>8k<input id="eq10_8" type="range" min="-12" max="12" value="0" step="1" aria-label="8 kHz" /></label>
 <label>16k<input id="eq10_9" type="range" min="-12" max="12" value="0" step="1" aria-label="16 kHz" /></label>
-<button id="btnCalm" class="btn">🧰 Calm</button>
+<button id="btnCalm" class="btn">ðŸ§° Calm</button>
 </div>
 </div>
 </div>
 
 <div id="winPlaylist" class="floatWin" style="width:320px;" role="dialog" aria-modal="false" aria-labelledby="winPlaylistTitle">
 <div class="winHeader">
-<strong id="winPlaylistTitle">📜 List</strong><span class="winBtns"><button class="btn" onclick="toggleWin('winPlaylist')">✕</button></span>
+<strong id="winPlaylistTitle">ðŸ“œ List</strong><span class="winBtns"><button class="btn" onclick="toggleWin('winPlaylist')">âœ•</button></span>
 </div>
 <div class="winBody">
 <div id="plList"></div>
@@ -959,7 +959,7 @@ Retune detect: --
 
 <div id="winChanInspect" class="floatWin" style="width:360px;right:8px;top:64px;" role="dialog" aria-modal="false" aria-labelledby="winChanInspectTitle">
 <div class="winHeader">
-<strong id="winChanInspectTitle">🎛 Channels</strong><span class="winBtns"><button class="btn" onclick="toggleWin('winChanInspect')">✕</button></span>
+<strong id="winChanInspectTitle">ðŸŽ› Channels</strong><span class="winBtns"><button class="btn" onclick="toggleWin('winChanInspect')">âœ•</button></span>
 </div>
 <div class="winBody">
   <div style="overflow:auto;max-height:360px;">
@@ -975,19 +975,19 @@ Retune detect: --
 
 <div id="winLog" class="floatWin" style="width:320px;" role="dialog" aria-modal="false" aria-labelledby="winLogTitle">
 <div class="winHeader">
-<strong id="winLogTitle">🧾 Log</strong><span class="winBtns"><button class="btn" onclick="toggleWin('winLog')">✕</button></span>
+<strong id="winLogTitle">ðŸ§¾ Log</strong><span class="winBtns"><button class="btn" onclick="toggleWin('winLog')">âœ•</button></span>
 </div>
-<button id="btnClearLog" class="btn" type="button" title="Clear status log">🧹 Clear Log</button>
+<button id="btnClearLog" class="btn" type="button" title="Clear status log">ðŸ§¹ Clear Log</button>
 
 <div class="winBody">
-<pre id="status" class="log" role="status" aria-live="polite">Ready (v5.4b.1‑perf). Mixer DOM built once; per‑frame updates are meter bars + counters only. Mobile/desktop responsive tweaks applied. Recording + Solfeggio overlay + Master Retune + Continuous Play + Lyrics + Karaoke. Global error logging enabled. Settings persisted to localStorage. Karaoke window frame/header/body follow Karaoke BG (no bands). Bugfixes applied.</pre>
+<pre id="status" class="log" role="status" aria-live="polite">Ready (v5.4b.1â€‘perf). Mixer DOM built once; perâ€‘frame updates are meter bars + counters only. Mobile/desktop responsive tweaks applied. Recording + Solfeggio overlay + Master Retune + Continuous Play + Lyrics + Karaoke. Global error logging enabled. Settings persisted to localStorage. Karaoke window frame/header/body follow Karaoke BG (no bands). Bugfixes applied.</pre>
 </div>
 </div>
 
 <div id="winLyrics" class="floatWin" style="width:460px;" role="dialog" aria-modal="false" aria-labelledby="winLyricsTitle">
 <div class="winHeader">
-<strong id="winLyricsTitle">📖 Lyrics</strong>
-<span class="winBtns"><button class="btn" onclick="toggleWin('winLyrics')">✕</button></span>
+<strong id="winLyricsTitle">ðŸ“– Lyrics</strong>
+<span class="winBtns"><button class="btn" onclick="toggleWin('winLyrics')">âœ•</button></span>
 </div>
 <div class="winBody" style="font-size:11px">
 <div style="display:flex; gap:6px; flex-wrap:wrap; align-items:center; margin-bottom:8px">
@@ -1005,12 +1005,12 @@ Retune detect: --
 </label>
 
 <label><input type="checkbox" id="lyPreserve" checked> Preserve spaces</label>
-<label><input type="checkbox" id="lySplitSlash" checked> Split on “/”</label>
+<label><input type="checkbox" id="lySplitSlash" checked> Split on â€œ/â€</label>
 <label>Encoding
   <select id="lyEnc">
-    <option value="auto" selected>Auto (UTF‑8 → Latin‑1 → Raw)</option>
-    <option value="latin1">Latin‑1</option>
-    <option value="utf8">UTF‑8</option>
+    <option value="auto" selected>Auto (UTFâ€‘8 â†’ Latinâ€‘1 â†’ Raw)</option>
+    <option value="latin1">Latinâ€‘1</option>
+    <option value="utf8">UTFâ€‘8</option>
   </select>
 </label>
 <button class="btn" id="btnLyFull">Full</button>
@@ -1031,8 +1031,8 @@ Retune detect: --
 <div class="winHeader">
 <strong id="winKaroTitle">karaokeHD</strong>
 <span class="winBtns">
-<button class="btn" id="btnKaroFS" title="Fullscreen" aria-pressed="false">⛶</button>
-<button class="btn" onclick="toggleWin('winKaro')">✕</button>
+<button class="btn" id="btnKaroFS" title="Fullscreen" aria-pressed="false">â›¶</button>
+<button class="btn" onclick="toggleWin('winKaro')">âœ•</button>
 </span>
 </div>
 <div class="winBody" style="font-size:11px">
@@ -1043,15 +1043,15 @@ Retune detect: --
 
 <div id="winKaroSettings" class="floatWin" style="width:520px;" role="dialog" aria-modal="false" aria-labelledby="winKaroSettingsTitle">
 <div class="winHeader">
-<strong id="winKaroSettingsTitle">⚙️ Karaoke Settings</strong>
-<span class="winBtns"><button class="btn" onclick="toggleWin('winKaroSettings')">✕</button></span>
+<strong id="winKaroSettingsTitle">âš™ï¸ Karaoke Settings</strong>
+<span class="winBtns"><button class="btn" onclick="toggleWin('winKaroSettings')">âœ•</button></span>
 </div>
 <div class="winBody" style="font-size:11px">
 <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin-bottom:8px">
 <label>Align <select id="karoAlign"><option value="left">Left</option><option value="center" selected>Center</option></select></label>
-<label><input type="checkbox" id="karoLettersOnly"> Letters‑only</label>
-<label><input type="checkbox" id="karoChromaSafe" checked> Chroma‑safe</label>
-<label><input type="checkbox" id="karoMicroStroke" checked> Micro‑stroke</label>
+<label><input type="checkbox" id="karoLettersOnly"> Lettersâ€‘only</label>
+<label><input type="checkbox" id="karoChromaSafe" checked> Chromaâ€‘safe</label>
+<label><input type="checkbox" id="karoMicroStroke" checked> Microâ€‘stroke</label>
 <label>Fill <input type="color" id="karoFill" value="#00b3ff"></label>
 <label>Base <input type="color" id="karoBase" value="#ffffff"></label>
 <label>BG   <input type="color" id="karoBg" value="#000000"></label>
@@ -1059,14 +1059,14 @@ Retune detect: --
 <label>Stroke <input type="range" id="karoStrokeW" min="0" max="6" step="0.5" value="1"></label>
 <label>Blend <select id="karoBlend"><option value="normal" selected>Normal</option><option value="screen">Screen</option><option value="overlay">Overlay</option><option value="lighten">Lighten</option><option value="multiply">Multiply</option></select></label>
 <label>Weight <input type="range" id="karoWeight" min="300" max="900" step="50" value="800"></label>
-<label>Letter‑spacing (em) <input type="range" id="karoLS" min="-0.02" max="0.20" step="0.01" value="0"></label>
+<label>Letterâ€‘spacing (em) <input type="range" id="karoLS" min="-0.02" max="0.20" step="0.01" value="0"></label>
 <label>Token gap (em) <input type="range" id="karoGap" min="0" max="0.30" step="0.01" value="0.04"></label>
 <label>Case <select id="karoCase"><option value="none" selected>As is</option><option value="upper">ALL CAPS</option><option value="lower">all small</option><option value="cap">Cap Each Word</option><option value="sentence">Sentence</option></select></label>
 </div>
 </div>
 
 
-<!-- ⚙️ Karaoke Settings › Font -->
+<!-- âš™ï¸ Karaoke Settings â€º Font -->
 
 <div class="ks-row" id="ks-font-upload-row">
 <input id="ks-font-file" type="file" accept=".ttf,.otf,.woff,.woff2" />
@@ -1084,7 +1084,7 @@ Retune detect: --
 </div>
 
 <div class="ks-row">
-<input id="ks-font-manual-name" class="ks-input" placeholder="Type a device font name… e.g., 'Calibri'" />
+<input id="ks-font-manual-name" class="ks-input" placeholder="Type a device font nameâ€¦ e.g., 'Calibri'" />
 <button id="ks-test-manual-font" class="ks-btn">Test & apply</button>
 </div>
 </div>
@@ -1093,16 +1093,41 @@ Retune detect: --
 
 
 <script>
-const MUTE_FACTOR = 0.0; const STORAGE_KEY = 'MIDI_POC_Ultra_v5.4b.1';
+// ========== KARAOKEHD MAIN SCRIPT ==========
+// Organized in sections:
+// 1. Logging & Error Handling
+// 2. Window Management (clear log, toggle, dragging)
+// 3. Instrument Symbols & Channel Mappings
+// 4. Audio Context, MIDI, and State Variables
+// 5. Settings, Defaults & Persistence
+// 6. UI Component Setup (mixer, playlis, karaoke)
+// 7. Audio Chain Initialization
+// 8. Visualization & Detection
+// 9. Playback Control (play, stop, panic)
+// 10. MIDI Event Handling & Voice Dispatch
+// 11. Voice Synthesis (piano, guitar, bass, drums)
+// 12. MIDI Parser Functions
+// 13. Lyrics Processing & Rendering
+// 14. UI Event Bindings & Settings Management
+// ============================================
+
+// ========== SECTION 1: Logging & Error Handling ==========
+const MUTE_FACTOR = 0.0;
+const STORAGE_KEY = 'MIDI_POC_Ultra_v5.4b.1';
+
 const log = (msg)=> {
-const el = document.getElementById('status'); el.textContent += `\n${msg}`; el.scrollTop = el.scrollHeight;
+  const el = document.getElementById('status');
+  el.textContent += `\n${msg}`;
+  el.scrollTop = el.scrollHeight;
 };
+
 window.addEventListener('error', (e)=> {
-try {
-log('JS Error: ' + (e.message || e));
-}catch(_) {}
+  try {
+    log('JS Error: ' + (e.message || e));
+  } catch(_) {}
 });
 
+// ========== SECTION 2: Window Management ==========
 function clearStatusLog() {
   const el = document.getElementById('status');
   if (!el) return;
@@ -1182,13 +1207,14 @@ w.style.zIndex = (++zCounter).toString();
   }
 })();
 
+// ========== SECTION 3: Instrument Symbols & Channel Mappings ==========
 const INST_SYM = {
-pianoLite: '🎹', deepBass: '🧱', guitar: '🎸', drumLite: '🥁', triangle: '△', square: '▢', saw: '⚡', fm: '∿'
+pianoLite: 'ðŸŽ¹', deepBass: 'ðŸ§±', guitar: 'ðŸŽ¸', drumLite: 'ðŸ¥', triangle: 'â–³', square: 'â–¢', saw: 'âš¡', fm: 'âˆ¿'
 };
 function instSymbol(name) {
-return INST_SYM[name] || '◦';
+return INST_SYM[name] || 'â—¦';
 }
- 
+Â 
 // Simple 16-channel fallback (0..15). Edit values to your taste.
 // Keep ch 9 = 'drumLite' for GM drums.
 const CH_TO_INST = [
@@ -1214,7 +1240,7 @@ function chanFallbackInst(ch) {
   return CH_TO_INST[ch] ?? 'pianoLite';
 }
 
-
+// ========== SECTION 4: Audio Context, MIDI, and State Variables ==========
 let audioCtx = null; let masterIn = null; let masterOut = null; let transport = null; let hpf = null; let notch = null; let clip = null; let analyser = null; let masterComp = null;
 let mediaDest = null; let mediaRecorder = null; let recChunks = [];
 const EQ_FREQS = [31, 62, 125, 250, 500, 1000, 2000, 4000, 8000, 16000]; let eqBands = [];
@@ -1277,6 +1303,7 @@ idle: 1.8
 }
 };
 
+// ========== SECTION 5: Settings, Defaults & Persistence ==========
 const defaults = {
 lyrics: {
 source: '05',
@@ -1289,7 +1316,6 @@ align: 'center',
 lettersOnly: false,
 chromaSafe: true,
 microStroke: true,
-aod: false,
 fill: '#f31260',
 base: '#ffffff',
 bg: '#00ff00',
@@ -1400,12 +1426,12 @@ function wireFinalStage(useAnalyser) {
     try { clip.disconnect(); } catch (_) {}
 
     if (useAnalyser && analyser) {
-      // clip → analyser → transport
+      // clip â†’ analyser â†’ transport
       clip.connect(analyser);
       try { analyser.disconnect(); } catch (_) {}
       analyser.connect(transport);
     } else {
-      // clip → transport
+      // clip â†’ transport
       clip.connect(transport);
     }
 
@@ -1441,13 +1467,14 @@ function applyAudioOnlyUI(on) {
   }
 }
 
+// ========== SECTION 6: UI Component Setup (Mixer, Playlist, Karaoke) ==========
 function buildMixerOnce() {
 if (mixerBuilt) return; const grid = document.getElementById('chGridVert'); grid.innerHTML = ''; for (let ch = 0; ch < 16; ch++) {
-const st = channels[ch]; const act = chAct[ch]; const strip = document.createElement('div'); strip.className = 'strip'; strip.dataset.ch = ch; strip.title = (ch+1)+' '+(st.inst || '')+(st.locked?' 🔒': ''); const ttl = document.createElement('div'); ttl.className = 'title'; const name = document.createElement('strong'); name.textContent = String(ch+1); ttl.appendChild(name); const badge = document.createElement('span'); badge.className = 'badge'; badge.textContent = instSymbol(st.inst || 'triangle'); ttl.appendChild(badge); titleBadges[ch] = badge; strip.appendChild(ttl); const meter = document.createElement('div'); meter.className = 'vMeter'; const bar = document.createElement('div'); bar.className = 'bar'; bar.style.height = Math.min(100, Math.floor((act.level || 0)*100))+'%'; meter.appendChild(bar); strip.appendChild(meter); meterBars[ch] = bar; const controls = document.createElement('div'); controls.className = 'controls'; const ctl = document.createElement('div'); ctl.className = 'ctlV'; const sel = document.createElement('select'); sel.className = 'symSel'; sel.innerHTML = '<option value="triangle">△</option>'+'<option value="saw">⚡</option>'+'<option value="square">▢</option>'+'<option value="guitar">🎸</option>'+'<option value="deepBass">🧱</option>'+(ch === 9?'<option value="drumLite" selected>🥁</option>': '<option value="pianoLite">🎹</option>'); sel.value = (st.inst || 'triangle'); sel.addEventListener('change', (e)=> {
-st.inst = e.target.value; st.locked = true; titleBadges[ch].textContent = instSymbol(st.inst); strip.title = (ch+1)+' '+(st.inst || '')+' 🔒';
+const st = channels[ch]; const act = chAct[ch]; const strip = document.createElement('div'); strip.className = 'strip'; strip.dataset.ch = ch; strip.title = (ch+1)+' '+(st.inst || '')+(st.locked?' ðŸ”’': ''); const ttl = document.createElement('div'); ttl.className = 'title'; const name = document.createElement('strong'); name.textContent = String(ch+1); ttl.appendChild(name); const badge = document.createElement('span'); badge.className = 'badge'; badge.textContent = instSymbol(st.inst || 'triangle'); ttl.appendChild(badge); titleBadges[ch] = badge; strip.appendChild(ttl); const meter = document.createElement('div'); meter.className = 'vMeter'; const bar = document.createElement('div'); bar.className = 'bar'; bar.style.height = Math.min(100, Math.floor((act.level || 0)*100))+'%'; meter.appendChild(bar); strip.appendChild(meter); meterBars[ch] = bar; const controls = document.createElement('div'); controls.className = 'controls'; const ctl = document.createElement('div'); ctl.className = 'ctlV'; const sel = document.createElement('select'); sel.className = 'symSel'; sel.innerHTML = '<option value="triangle">â–³</option>'+'<option value="saw">âš¡</option>'+'<option value="square">â–¢</option>'+'<option value="guitar">ðŸŽ¸</option>'+'<option value="deepBass">ðŸ§±</option>'+(ch === 9?'<option value="drumLite" selected>ðŸ¥</option>': '<option value="pianoLite">ðŸŽ¹</option>'); sel.value = (st.inst || 'triangle'); sel.addEventListener('change', (e)=> {
+st.inst = e.target.value; st.locked = true; titleBadges[ch].textContent = instSymbol(st.inst); strip.title = (ch+1)+' '+(st.inst || '')+' ðŸ”’';
 }); ctl.appendChild(sel); const lock = document.createElement('label'); const cb = document.createElement('input'); cb.type = 'checkbox'; cb.checked = st.locked; cb.addEventListener('change', (e)=> {
-st.locked = e.target.checked; strip.title = (ch+1)+' '+(st.inst || '')+(st.locked?' 🔒': '');
-}); lock.appendChild(cb); lock.appendChild(document.createTextNode('🔒')); ctl.appendChild(lock); const m = document.createElement('label'); const mcb = document.createElement('input'); mcb.type = 'checkbox'; mcb.checked = st.mute; mcb.addEventListener('change', (e)=> {
+st.locked = e.target.checked; strip.title = (ch+1)+' '+(st.inst || '')+(st.locked?' ðŸ”’': '');
+}); lock.appendChild(cb); lock.appendChild(document.createTextNode('ðŸ”’')); ctl.appendChild(lock); const m = document.createElement('label'); const mcb = document.createElement('input'); mcb.type = 'checkbox'; mcb.checked = st.mute; mcb.addEventListener('change', (e)=> {
 st.mute = e.target.checked; updateMixGains();
 }); m.appendChild(mcb); m.appendChild(document.createTextNode('M')); m.className = 'muted'; ctl.appendChild(m); const s = document.createElement('label'); const scb = document.createElement('input'); scb.type = 'checkbox'; scb.checked = st.solo; scb.addEventListener('change', (e)=> {
 st.solo = e.target.checked; updateMixGains();
@@ -1493,7 +1520,7 @@ settings.audio.notch = parseFloat(e.target.value || '0'); persistSettings(); onN
 const ss = document.getElementById('softSynth'); if (ss) ss.addEventListener('change', (e)=> {
 useTriangle = e.target.checked; log('Soft Synth '+(useTriangle?'ON': 'OFF'));
 }); const ab = document.getElementById('antiBeep'); if (ab) ab.addEventListener('change', (e)=> {
-antiBeep = e.target.checked; log('Anti‑Beep '+(antiBeep?'ON': 'OFF'));
+antiBeep = e.target.checked; log('Antiâ€‘Beep '+(antiBeep?'ON': 'OFF'));
 });
 })(); const palSel = document.getElementById('palette'); if (palSel) palSel.addEventListener('change', (e)=> {
 settings.ui.palette = e.target.value; persistSettings(); palette = settings.ui.palette; log('Palette '+palette); for (let ch = 0; ch < 16; ch++) {
@@ -1695,11 +1722,11 @@ settings.ui.autoRecovery = (e.target.value === '1'); persistSettings(); autoReco
   // === Encoding: enforce auto detect ===
   if (encSel) {
     encSel.addEventListener('change', async (e)=> {
-      // You can optionally ignore UI and force auto…
+      // You can optionally ignore UI and force autoâ€¦
       settings.lyrics.enc = 'auto';
       lyrics.enc = 'auto';
       persistSettings();
-      // …or reflect the enforcement in the dropdown
+      // â€¦or reflect the enforcement in the dropdown
       try { encSel.value = 'auto'; } catch(_) {}
       await refreshLyricsAfterChange();
     });
@@ -1778,7 +1805,7 @@ KaroState.lettersOnly = !!e.target.checked; settings.karaoke.lettersOnly=!!e.tar
 (e)=>setWeight(parseInt(e.target.value || '800', 10))); $('karoLS').addEventListener('input',
 (e)=>setLS(parseFloat(e.target.value || '0'))); $('karoGap').addEventListener('input',
 (e)=>setGap(parseFloat(e.target.value || '0'))); $('karoCase').addEventListener('change',
-(e)=>setCase(e.target.value)); setAlign(settings.karaoke.align); setChromaSafe(settings.karaoke.chromaSafe); setMicroStroke(settings.karaoke.microStroke); setFill(settings.karaoke.fill); setBase(settings.karaoke.base); setBg(settings.karaoke.bg); setGlow(settings.karaoke.glow); setStrokeW(settings.karaoke.strokeW); setBlend(settings.karaoke.blend); setWeight(settings.karaoke.weight); setLS(settings.karaoke.letterSpacing); setGap(settings.karaoke.tokenGap); setCase(settings.karaoke.case); $('karoLettersOnly').checked = settings.karaoke.lettersOnly; $('karoAlign').value = settings.karaoke.align; $('karoChromaSafe').checked = settings.karaoke.chromaSafe; $('karoMicroStroke').checked = settings.karaoke.microStroke; $('karoFill').value = settings.karaoke.fill; $('karoBase').value = settings.karaoke.base; $('karoBg').value = settings.karaoke.bg; $('karoGlow').value = settings.karaoke.glow; $('karoStrokeW').value = settings.karaoke.strokeW; $('karoBlend').value = settings.karaoke.blend; $('karoWeight').value = settings.karaoke.weight; $('karoLS').value = settings.karaoke.letterSpacing; $('karoGap').value = settings.karaoke.tokenGap; $('karoCase').value = settings.karaoke.case; ;
+(e)=>setCase(e.target.value)); setAlign(settings.karaoke.align); setChromaSafe(settings.karaoke.chromaSafe); setMicroStroke(settings.karaoke.microStroke); setFill(settings.karaoke.fill); setBase(settings.karaoke.base); setBg(settings.karaoke.bg); setGlow(settings.karaoke.glow); setStrokeW(settings.karaoke.strokeW); setBlend(settings.karaoke.blend); setWeight(settings.karaoke.weight); setLS(settings.karaoke.letterSpacing); setGap(settings.karaoke.tokenGap); setCase(settings.karaoke.case); $('karoLettersOnly').checked = settings.karaoke.lettersOnly; $('karoAlign').value = settings.karaoke.align; $('karoChromaSafe').checked = settings.karaoke.chromaSafe; $('karoMicroStroke').checked = settings.karaoke.microStroke; $('karoFill').value = settings.karaoke.fill; $('karoBase').value = settings.karaoke.base; $('karoBg').value = settings.karaoke.bg; $('karoGlow').value = settings.karaoke.glow; $('karoStrokeW').value = settings.karaoke.strokeW; $('karoBlend').value = settings.karaoke.blend; $('karoWeight').value = settings.karaoke.weight; $('karoLS').value = settings.karaoke.letterSpacing; $('karoGap').value = settings.karaoke.tokenGap; $('karoCase').value = settings.karaoke.case; }
 })(); (function() {
 const fsBtn = document.getElementById('btnKaroFS'); const win = document.getElementById('winKaro'); function toggleFS() {
 if (!document.fullscreenElement) {
@@ -1787,7 +1814,7 @@ win.requestFullscreen?.();
 document.exitFullscreen?.();
 }
 } fsBtn.addEventListener('click', toggleFS); document.addEventListener('fullscreenchange', ()=> {
-const active = !!document.fullscreenElement; fsBtn.textContent = active? '⤢': '⛶'; fsBtn.setAttribute('aria-pressed', active? 'true': 'false');
+const active = !!document.fullscreenElement; fsBtn.textContent = active? 'â¤¢': 'â›¶'; fsBtn.setAttribute('aria-pressed', active? 'true': 'false');
 });
 })(); document.getElementById('density').value = settings.ui.density; applyDensity(settings.ui.density); fit16Active = settings.ui.fit16; document.getElementById('fit16').checked = settings.ui.fit16; if (fit16Active) autoFit16(); document.getElementById('palette').value = settings.ui.palette; palette = settings.ui.palette; document.getElementById('preset').value = settings.ui.preset; applyPreset(settings.ui.preset); document.getElementById('limStr').value = settings.audio.limiter; onLimiter(); document.getElementById('notch').value = settings.audio.notch; onNotch(); document.getElementById('contMode').value = settings.ui.contMode; contMode = settings.ui.contMode; document.getElementById('autoAssign').value = settings.ui.autoAssign? '1': '0'; autoAssign = settings.ui.autoAssign; document.getElementById('autoRecovery').value = settings.ui.autoRecovery? '1': '0'; autoRecovery = settings.ui.autoRecovery; document.getElementById('solfEnable').checked = settings.audio.solfEnable; solfEnable = settings.audio.solfEnable; document.getElementById('solfType').value = settings.audio.solfType; solfType = settings.audio.solfType; document.getElementById('solfFreq').value = String(settings.audio.solfFreq); solfFreq = settings.audio.solfFreq; document.getElementById('solfLevel').value = String(settings.audio.solfLevel); document.getElementById('tuneEnable').checked = settings.audio.tuneEnable; tuneEnable = settings.audio.tuneEnable; document.getElementById('tuneFreq').value = String(settings.audio.tuneFreq); tuneFreq = settings.audio.tuneFreq; applySavedWindows(); buildMixerOnce();
 
@@ -1798,7 +1825,7 @@ audioOnlyCB.addEventListener('change', (e)=> {
 settings.ui.audioOnly = !!e.target.checked;
 persistSettings();
 applyAudioOnlyUI(settings.ui.audioOnly);
-log('Audio‑only ' + (settings.ui.audioOnly ? 'ON': 'OFF'));
+log('Audioâ€‘only ' + (settings.ui.audioOnly ? 'ON': 'OFF'));
 });
 audioOnlyCB.checked = !!settings.ui.audioOnly;
 applyAudioOnlyUI(!!settings.ui.audioOnly);
@@ -1827,6 +1854,7 @@ function autoFit16() {
 const grid = document.getElementById('chGridVert'); const gap = parseInt(getComputedStyle(grid).gap) || 6; const W = window.innerWidth - 16; const min = 48; const col = Math.max(min, Math.floor((W - gap*(16-1))/16)); document.documentElement.style.setProperty('--stripW', col+'px'); const meterH = Math.max(56, Math.floor(col*1.05)); document.documentElement.style.setProperty('--meterH', meterH+'px'); document.documentElement.style.setProperty('--meterW', Math.max(4, Math.floor(col*0.10))+'px');
 }
 
+// ========== SECTION 7: Audio Chain Initialization ==========
 function initAudioChain() {
   masterIn = audioCtx.createGain();
   masterIn.gain.value = 1.0;
@@ -1896,7 +1924,7 @@ function initAudioChain() {
     } catch(_) {}
   })();
 
-  // Chain: masterIn → EQ → HPF → Notch → Clip → (analyser?) → transport → outputs
+  // Chain: masterIn â†’ EQ â†’ HPF â†’ Notch â†’ Clip â†’ (analyser?) â†’ transport â†’ outputs
   let node = masterIn;
   for (const b of eqBands) {
     node.connect(b);
@@ -1905,7 +1933,7 @@ function initAudioChain() {
   // Insert compressor before the soft-clip to tame peaks
   node.connect(hpf).connect(notch).connect(masterComp).connect(clip);
 
-  // Respect compressor bypass setting: if bypassed, route notch → clip directly
+  // Respect compressor bypass setting: if bypassed, route notch â†’ clip directly
   if (settings.audio.compBypass) {
     try { masterComp.disconnect(); } catch(_) {}
     try { notch.disconnect(); } catch(_) {}
@@ -1918,10 +1946,10 @@ function initAudioChain() {
   analyserBypassed = !!settings.ui.audioOnly;
 
   try {
-    wireFinalStage(!analyserBypassed); // clip → analyser → transport OR clip → transport
+    wireFinalStage(!analyserBypassed); // clip â†’ analyser â†’ transport OR clip â†’ transport
   } catch (e) {
     try { log('Wire error: ' + (e.message || e)); } catch (_) {}
-    // Fallback: hard-connect clip → transport → outputs to avoid init failure
+    // Fallback: hard-connect clip â†’ transport â†’ outputs to avoid init failure
     try {
       clip.connect(transport);
       transport.connect(masterOut);
@@ -1959,7 +1987,7 @@ vizBufferF = new Float32Array(analyser ? analyser.fftSize: 2048);
 }
 
 
-
+// ========== SECTION 8: Visualization & Detection ==========
 function drawWave() {
 if (!vizCtx) {
 requestAnimationFrame(drawWave); return;
@@ -2185,7 +2213,7 @@ return Math.max(0, Math.min(127, Math.round(69 + 12*Math.log2(f/440))));
 function updateRetune() {
 if (!audioCtx) return; if (!tuneEnable) {
 globalDetuneRatio = 1.0; return;
-} const target = tuneFreq || 528; const midi = nearestMidiNoteForFreq(target); const std = midiToFreq(midi); globalDetuneRatio = Math.max(0.25, Math.min(4.0, target / std)); log(`Retune: target ${target} Hz ~ MIDI ${midi} (${std.toFixed(2)} Hz) → ratio ${globalDetuneRatio.toFixed(6)}`);
+} const target = tuneFreq || 528; const midi = nearestMidiNoteForFreq(target); const std = midiToFreq(midi); globalDetuneRatio = Math.max(0.25, Math.min(4.0, target / std)); log(`Retune: target ${target} Hz ~ MIDI ${midi} (${std.toFixed(2)} Hz) â†’ ratio ${globalDetuneRatio.toFixed(6)}`);
 }
 
 function startRecording(mode) {
@@ -2211,7 +2239,7 @@ try {
 URL.revokeObjectURL(url);
 }catch(_) {}
 }, 5*60*1000);
-}; mediaRecorder.start(); document.getElementById('btnRecStop').disabled = false; log('⏺ Recording '+(mode === 'restart'?'(restart)': '(current)')); if (mode === 'restart') {
+}; mediaRecorder.start(); document.getElementById('btnRecStop').disabled = false; log('âº Recording '+(mode === 'restart'?'(restart)': '(current)')); if (mode === 'restart') {
 stopPlayback(); ensureParsed().then((ok)=> {
 if (ok) {
 startPlayback(true);
@@ -2360,7 +2388,7 @@ label.textContent = (i+1) + '. ' + t.name + (t.parsed ? '': ' (noOb)');
 const playBtn = document.createElement('button');
 playBtn.className = 'btn';
 playBtn.type = 'button';
-playBtn.textContent = '▶';
+playBtn.textContent = 'â–¶';
 playBtn.title = 'Play';
 
 playBtn.addEventListener('click', async (ev)=> {
@@ -2421,7 +2449,7 @@ try {
 LyricsLive.rebuild(); Karo.rebuild();
 }catch(_) {}
 }
-const song = playlist[i]; _tempo = song.tempo; seq.events = song.events || []; updatePlaylistUI(); document.getElementById('btnPlay').disabled = false; document.getElementById('btnStop').disabled = false; log('Selected: '+song.name+(song.parsed?' • parsed': ' • lazy')); document.getElementById('currentTitle').textContent = playlist[i].name || '(Unknown title)';
+const song = playlist[i]; _tempo = song.tempo; seq.events = song.events || []; updatePlaylistUI(); document.getElementById('btnPlay').disabled = false; document.getElementById('btnStop').disabled = false; log('Selected: '+song.name+(song.parsed?' â€¢ parsed': ' â€¢ lazy')); document.getElementById('currentTitle').textContent = playlist[i].name || '(Unknown title)';
 
 if (song.lyrics) {
 lyrics.json = song.lyrics; renderLyricsStatic(); LyricsLive.rebuild(); Karo.rebuild();
@@ -2465,7 +2493,7 @@ async function ensureParsed() {
     const metaEvs = collectMetaLyrics(smf);
 
 
-// ==== RAW LYRICS (source) — END ====
+// ==== RAW LYRICS (source) â€” END ====
 // ==== RAW LYRICS (source) ====
 try {
   for (const e of metaEvs) {
@@ -2506,10 +2534,10 @@ try {
     else if (uiSrc === '01') allowPrimary = [0x01];
     else if (uiSrc === '03') allowPrimary = [0x03];
     else {
-      // Any other value (including combos like '01+05+03') → auto single-source
+      // Any other value (including combos like '01+05+03') â†’ auto single-source
       const dominant = pickDominantLyricType(metaEvs);
       allowPrimary = [dominant];
-      log(`Lyric source AUTO → using 0x${dominant.toString(16)} only (no mixing).`);
+      log(`Lyric source AUTO â†’ using 0x${dominant.toString(16)} only (no mixing).`);
     }
 
     // === Always use auto encoding ===
@@ -2564,7 +2592,7 @@ try {
     return false;
   }
 }
- 
+Â 
 
 async function startPlayback(withGap = false) {
 if (!audioCtx) {
@@ -2581,7 +2609,7 @@ try {
 g.gain.setValueAtTime(0.0, t0); g.gain.setTargetAtTime(channels[ch].baseGain*channels[ch].expr, startAt, 0.015);
 }catch(e) {}
 }
-} updateMixGains(true); seq.startTime = startAt; seq.ptr = 0; seq.running = true; if (seq.timer) clearInterval(seq.timer); seq.timer = setInterval(scheduleTick, seq.lookAhead*1000); log('▶ '+(playlist[currentIndex]?.name || '')); lyrics.startAt = startAt; if (!audioOnly) {
+} updateMixGains(true); seq.startTime = startAt; seq.ptr = 0; seq.running = true; if (seq.timer) clearInterval(seq.timer); seq.timer = setInterval(scheduleTick, seq.lookAhead*1000); log('â–¶ '+(playlist[currentIndex]?.name || '')); lyrics.startAt = startAt; if (!audioOnly) {
 LyricsLive.rebuild(); LyricsLive.start(); Karo.rebuild(); Karo.start(lyrics.startAt);
 }
 }
@@ -2589,14 +2617,14 @@ LyricsLive.rebuild(); LyricsLive.start(); Karo.rebuild(); Karo.start(lyrics.star
 function stopPlayback() {
 if (seq.timer) clearInterval(seq.timer); seq.timer = null; seq.running = false; try {
 transport.gain.setTargetAtTime(0.0, audioCtx.currentTime, 0.02);
-}catch(e) {} hardResetAudio(); log('⏹ Stopped'); try {
+}catch(e) {} hardResetAudio(); log('â¹ Stopped'); try {
 LyricsLive && LyricsLive.stop();
 }catch(_) {} try {
 Karo && Karo.stop();
 }catch(_) {}
 }
 function panicAll() {
-hardResetAudio(); log('⛑ Panic: all voices killed and channels muted.'); try {
+hardResetAudio(); log('â›‘ Panic: all voices killed and channels muted.'); try {
 LyricsLive && LyricsLive.stop();
 }catch(_) {} try {
 Karo && Karo.stop();
@@ -2606,7 +2634,7 @@ function scheduleTick() {
 const horizon = audioCtx.currentTime - seq.startTime + seq.scheduleAhead; while (seq.ptr < seq.events.length) {
 const ev = seq.events[seq.ptr]; const when = seq.startTime + tickToSec(ev.tick - seq.startTick); if ((when - audioCtx.currentTime) > seq.scheduleAhead) break; dispatchMidi(ev, when); seq.ptr++;
 } if (seq.ptr >= seq.events.length) {
-clearInterval(seq.timer); seq.timer = null; seq.running = false; log('✅ Finished'); LyricsLive.stop(); Karo.stop(); if (contMode === 'next') {
+clearInterval(seq.timer); seq.timer = null; seq.running = false; log('âœ… Finished'); LyricsLive.stop(); Karo.stop(); if (contMode === 'next') {
 const next = currentIndex+1; if (next < playlist.length) {
 selectTrack(next); startPlayback(true);
 }
@@ -2708,7 +2736,7 @@ st.inst = desired;
 // Neutral placeholders are considered "not yet assigned"
 const PLACEHOLDERS = new Set(['triangle', 'square', 'saw']);
 
-// Manual/assigned → GM Program → Channel fallback (only when neutral and no program)
+// Manual/assigned â†’ GM Program â†’ Channel fallback (only when neutral and no program)
 function resolveInstrument(ch) {
   const st = channels[ch];
   if (!st) return 'triangle'; // safety
@@ -2722,7 +2750,7 @@ function resolveInstrument(ch) {
   // 3) Passive channel fallback (only when neutral / no program)
   return chanFallbackInst(ch);
 }
- 
+Â 
 
 function dispatchMidi(ev, when) {
   const ch = (ev.ch | 0) || 0;
@@ -2920,7 +2948,7 @@ function dispatchMidi(ev, when) {
       // 14-bit bend: center 8192
       const bend14 = (((ev.msb | 0) << 7) | (ev.lsb | 0)) - 8192;
 
-      // Use dynamic bend range from RPN 0/0 if set; default ±2
+      // Use dynamic bend range from RPN 0/0 if set; default Â±2
       const semitoneRange = (st.bendRange ?? 2);
       st.bend = (bend14 / 8192) * semitoneRange;
 
@@ -2977,7 +3005,7 @@ function velCurve(vel) {
   return Math.pow(vlin, 0.90);  // gentle curve; use 0.85 for drums
 }
 
-// Guard start-time against "start now" crackles (mobile‑friendly)
+// Guard start-time against "start now" crackles (mobileâ€‘friendly)
 function guardStartTime(when) {
   try {
     const now = audioCtx?.currentTime ?? 0;
@@ -3077,7 +3105,7 @@ function simpleVoice(ch, note, vel, when) {
   const panOk = !!audioCtx.createStereoPanner;
   const pan = panOk ? audioCtx.createStereoPanner() : null;
   if (pan) {
-    // Tiny random spread per note (±0.12)
+    // Tiny random spread per note (Â±0.12)
     pan.pan.value = (Math.random() * 0.24) - 0.12;
   }
 
@@ -3425,7 +3453,7 @@ function fretlessBassVoice(ch, note, vel, when) {
   lfoCh.type = 'sine';
   lfoCh.frequency.setValueAtTime(0.35, when);          // very slow
   const chDepth = audioCtx.createGain();
-  chDepth.gain.setValueAtTime(0.0012, when);           // ±1.2ms (seconds)
+  chDepth.gain.setValueAtTime(0.0012, when);           // Â±1.2ms (seconds)
 
   lfoCh.connect(chDepth).connect(chorusDelay.delayTime);
 
@@ -3503,7 +3531,7 @@ function guitarLiteVoice(ch, note, vel, when) {
   g.exponentialRampToValueAtTime(Math.max(MIN_GAIN, HEADROOM * v * 0.42), when + 0.140); // brief decay
 
   // Filters: focus steel-guitar bite, keep highs but tame fizz
-  const bp = audioCtx.createBiquadFilter(); // emphasize ~2–4 kHz
+  const bp = audioCtx.createBiquadFilter(); // emphasize ~2â€“4 kHz
   bp.type = 'bandpass';
   bp.frequency.setValueAtTime(2200, when);
   bp.Q.value = 1.2;
@@ -3542,11 +3570,11 @@ function guitarLiteVoice(ch, note, vel, when) {
   // --- Vibrato LFO (classic steel) with delayed onset
   const lfo = audioCtx.createOscillator();
   lfo.type = 'sine';
-  lfo.frequency.value = 5.6; // steel vibrato ~5–6 Hz
+  lfo.frequency.value = 5.6; // steel vibrato ~5â€“6 Hz
 
   const vibDepth = audioCtx.createGain(); // in cents
   vibDepth.gain.setValueAtTime(0, when);
-  vibDepth.gain.linearRampToValueAtTime(12 * v, when + 0.080); // fade-in vibrato depth (~±12 cents)
+  vibDepth.gain.linearRampToValueAtTime(12 * v, when + 0.080); // fade-in vibrato depth (~Â±12 cents)
   lfo.connect(vibDepth);
   vibDepth.connect(o1.detune);
   vibDepth.connect(o2.detune);
@@ -3569,7 +3597,7 @@ function guitarLiteVoice(ch, note, vel, when) {
 
   // --- Comb resonance for "steel" metallic twang (short delay + feedback)
   const combDelay = audioCtx.createDelay();
-  combDelay.delayTime.setValueAtTime(0.0036 + 0.0003 * v, when); // ~3.6–3.9 ms
+  combDelay.delayTime.setValueAtTime(0.0036 + 0.0003 * v, when); // ~3.6â€“3.9 ms
 
   const combFB = audioCtx.createGain();      // feedback
   combFB.gain.value = 0.20;
@@ -3669,7 +3697,7 @@ function drumLiteVoice(ch, note, vel, when, st) {
 if (!stopRegistry[ch]) {
   stopRegistry[ch] = new Map();
 }
- 
+Â 
 
   // === KICK: notes 35/36 (sine body + transient click) ===
   if (note === 35 || note === 36) {
@@ -3696,7 +3724,7 @@ if (!stopRegistry[ch]) {
       const cbuf = getNoiseBuffer('click_4ms', sr, 4, 0.0);
       const chp = audioCtx.createBiquadFilter();
       chp.type = 'highpass';
-      chp.frequency.value = 2000; // 1.8–2.2k Hz range
+      chp.frequency.value = 2000; // 1.8â€“2.2k Hz range
       const cg = audioCtx.createGain();
       cg.gain.setValueAtTime(0.12 * vlin, when);
 
@@ -3760,7 +3788,7 @@ if (note === 38 && vel >= 110) {
   const airHPF   = 3200;
 
   for (let i = 0; i < tapsN; i++) {
-    const jitter = (Math.random() - 0.5) * 0.006;              // ±6 ms timing jitter
+    const jitter = (Math.random() - 0.5) * 0.006;              // Â±6 ms timing jitter
     const startT = when + i * baseGap + jitter;
 
     const phase   = i / (tapsN - 1);
@@ -3859,7 +3887,7 @@ if (note === 38 && vel >= 110) {
     return;
   }
 
-  // === HI-HATS: 42 closed / 46 open — with choke logic ===
+  // === HI-HATS: 42 closed / 46 open â€” with choke logic ===
   if (note === 42 || note === 46) {
     // Choke any ringing open hat when closed hat is triggered
    if (note === 42 && hiHatRegistry.open) {
@@ -4223,7 +4251,7 @@ if (note === 71 || note === 72) {
   // Vibrato (LFO)
   try {
     const lfo = audioCtx.createOscillator(); lfo.type='sine'; lfo.frequency.value=6.2;
-    const lfoGain = audioCtx.createGain(); lfoGain.gain.value = 16; // ±16 Hz
+    const lfoGain = audioCtx.createGain(); lfoGain.gain.value = 16; // Â±16 Hz
     lfo.connect(lfoGain).connect(osc.frequency);
     lfo.start(when); lfo.stop(when + dur);
   } catch(_) {}
@@ -4320,7 +4348,7 @@ if (note === 80 || note === 81) {
 }
 
 // instrument ends here
- 
+Â 
 
 function voiceWatchdogLoop() {
 if (!audioCtx) {
@@ -4344,10 +4372,10 @@ try {
 v.node.stop?.(now+0.01); v.node.disconnect?.();
 }catch(e) {} voices.splice(i, 1);
 }
-} log(`Failsafe: CH${ch+1} (${inst}) abnormal — muted & culled.`); act.level = 0; act.last = now; if (autoRecovery) {
+} log(`Failsafe: CH${ch+1} (${inst}) abnormal â€” muted & culled.`); act.level = 0; act.last = now; if (autoRecovery) {
 const back = channels[ch].baseGain*channels[ch].expr*channelTargetFactor(ch); try {
 channels[ch].gain.gain.setTargetAtTime(back, now+1.2, 0.08);
-}catch(e) {} log(`Auto‑recovery: CH${ch+1} ~1.2s.`);
+}catch(e) {} log(`Autoâ€‘recovery: CH${ch+1} ~1.2s.`);
 }
 }
 } requestAnimationFrame(voiceWatchdogLoop);
@@ -4381,7 +4409,7 @@ chAct[ch].level = 0; chAct[ch].last = t;
 } updateMixerMeters(); stopSolfOscs();
 }
 // Soft clip curve with mild pre-drive for smoother saturation.
-// k: drive (0.7–0.9 good), n: resolution (8192 recommended), pregain: gentle pre-amplification.
+// k: drive (0.7â€“0.9 good), n: resolution (8192 recommended), pregain: gentle pre-amplification.
 function makeSoftClipCurve(k = 0.80, n = 8192, pregain = 1.08) {
   const curve = new Float32Array(n);
   for (let i = 0; i < n; i++) {
@@ -4550,7 +4578,7 @@ function tryDecode(bytes, enc) {
 }
 
 function autoDecode(bytes) {
-  // Try UTF‑8 first; if replacement char appears, fallback to Latin‑1 or raw
+  // Try UTFâ€‘8 first; if replacement char appears, fallback to Latinâ€‘1 or raw
   let s = '';
   if (decUtf8) {
     try { s = decUtf8.decode(bytes); } catch(_) { s = ''; }
@@ -4826,7 +4854,7 @@ function renderLyricsStatic() {
           tm.textContent = `[${(w.t || 0).toFixed(2)}]`;
 
           const tx = document.createElement('span');
-          tx.textContent = (w.w === ' ')? '␠': String(w.w || '');
+          tx.textContent = (w.w === ' ')? 'â ': String(w.w || '');
 
           row.appendChild(tm);
           row.appendChild(tx);
@@ -4887,7 +4915,7 @@ chip.className = 'chip';
 chip.title = 'Seconds until next lyric line starts';
 chip.style.marginBottom = '8px';
 chip.style.display = 'inline-block';
-chip.textContent = '⏱ Next in: --';
+chip.textContent = 'â± Next in: --';
 const anchor = document.getElementById('lyPrev');
 if (anchor && anchor.parentNode) {
 anchor.parentNode.insertBefore(chip, anchor);
@@ -4907,18 +4935,18 @@ return [];
 }
 })();
 if (!lines.length) {
-chip.textContent = '⏱ Next in: --'; chip.style.color = '#9fbad1'; chip.style.display = ''; return;
+chip.textContent = 'â± Next in: --'; chip.style.color = '#9fbad1'; chip.style.display = ''; return;
 }
 let li = 0;
 while (li+1 < lines.length && lines[li+1].main <= nowRel) li++;
 const nextMain = (li+1 < lines.length) ? (lines[li+1].main || NaN): NaN;
 const delta = (isFinite(nextMain) ? nextMain - nowRel: NaN);
 if (!isFinite(delta) || delta < 0) {
-chip.textContent = '⏱ Next in: --';
+chip.textContent = 'â± Next in: --';
 chip.style.color = '#9fbad1';
 return;
 }
-chip.textContent = '⏱ Next in: ' + delta.toFixed(2) + 's';
+chip.textContent = 'â± Next in: ' + delta.toFixed(2) + 's';
 chip.style.color = (delta < 0.20) ? '#f31260': (delta < 0.50 ? '#f5a524': '#9fbad1');
 }
 
@@ -5030,7 +5058,7 @@ try { await document.exitFullscreen(); }
 catch(err){ const anyDoc=document; if(anyDoc && anyDoc.webkitExitFullscreen){ anyDoc.webkitExitFullscreen(); } else { try{ log('Exit fullscreen failed: '+(err?.message||err)); }catch(_){} } }
 }
 async function toggleFS(){ if(isFS()) await exitFS(); else await enterFS(); syncUI(); }
-function syncUI(){ const active=isFS(); btn.textContent=active? '⤢' : '⛶'; btn.setAttribute('aria-pressed', active? 'true':'false'); btn.title=active? 'Exit full screen' : 'Full screen'; }
+function syncUI(){ const active=isFS(); btn.textContent=active? 'â¤¢' : 'â›¶'; btn.setAttribute('aria-pressed', active? 'true':'false'); btn.title=active? 'Exit full screen' : 'Full screen'; }
 
 btn.addEventListener('click', toggleFS);
 document.addEventListener('fullscreenchange', syncUI);
@@ -5149,7 +5177,7 @@ bars.appendChild(seg);
 
 const brand=document.createElement('div');
 brand.className='karoStartBrand';
-brand.textContent='KaraokeHD©';
+brand.textContent='KaraokeHDÂ©';
 brand.style.marginTop='4px';
 brand.style.fontSize='15px';
 brand.style.color='#000000FF';
@@ -5194,7 +5222,7 @@ function isWordHighlightable(w){
 if(!w) return false;
 const s=String(w.w || '').trim();
 if(!s) return false;
-if(s==='\u2420' || s==='␠') return false;
+if(s==='\u2420' || s==='â ') return false;
   if(/^<-{3}karaokeHD-{3}>$/.test(s)) return false;
 return true;
 }
@@ -5204,7 +5232,7 @@ const lines = (KaroState && Array.isArray(KaroState.linesPrepared)) ? KaroState.
 for(let i=0;i<lines.length;i++){
 const L=lines[i] || {};
 const textStr = String(L.text || '');
-if (textStr === '<---karaokeHD--->') continue;
+if(/^<---karaokeHD--->$/.test(textStr)) continue;
 const words = Array.isArray(L.words) ? L.words : [];
 for(let j=0;j<words.length;j++){
 const w=words[j];
@@ -5275,7 +5303,7 @@ const chip = document.createElement('span');
 chip.id = IDS.left;
 chip.className = 'chip';
 chip.title = 'Seconds until next karaoke line starts';
-chip.textContent = '⏱ Next in: --';
+chip.textContent = 'â± Next in: --';
 chip.style.position = 'absolute';
 chip.style.top = '8px';
 chip.style.left = '8px';
@@ -5313,12 +5341,12 @@ function updateChip(id, delta){
 const chip = document.getElementById(id);
 if(!chip) return;
 if(!isFinite(delta)){
-chip.textContent = '⏱ Next in: --';
+chip.textContent = 'â± Next in: --';
 chip.style.color = '#9fbad1';
 chip.style.display = '';
 return;
 }
-chip.textContent = '⏱ Next in: ' + delta.toFixed(2) + 's';
+chip.textContent = 'â± Next in: ' + delta.toFixed(2) + 's';
 chip.style.color = (delta < 0.20) ? '#f31260' : (delta < 0.50 ? '#f5a524' : '#9fbad1');
 }
 
@@ -5830,7 +5858,7 @@ const PRESETS = {
   ]
 };
 
-// Composite stack string (cross‑OS “native” look)
+// Composite stack string (crossâ€‘OS â€œnativeâ€ look)
 const FAMILY_MAP = {
 'system-ui stack': 'system-ui, "Segoe UI", Roboto, "Noto Sans", "Helvetica Neue", Arial, sans-serif'
 };
@@ -5877,7 +5905,7 @@ applyKaraokeFont(val);
 addPresetOptions();
 wirePicker();
 
-// Optional: if you have a “Font source” select (#ks-font-source), refresh list when changing.
+// Optional: if you have a â€œFont sourceâ€ select (#ks-font-source), refresh list when changing.
 const src = $('#ks-font-source');
 if (src) src.addEventListener('change', () => {
 // Do nothing special; presets remain in the list alongside uploads/device fonts.
@@ -5942,7 +5970,7 @@ function rebuildLyricSourceOptions(metaEvs) {
 
 
 
- <script>
+Â <script>
 (function () {
   const win = document.getElementById('winKaro');
   const body = win?.querySelector('.winBody');
@@ -5953,7 +5981,7 @@ function rebuildLyricSourceOptions(metaEvs) {
   const simpleBtn = document.createElement('button');
   simpleBtn.className = 'karoSimpleBtn';
   simpleBtn.title = 'Settings';
-  simpleBtn.textContent = '⚙';
+  simpleBtn.textContent = 'âš™';
   win.appendChild(simpleBtn);
 
   const miniPanel = document.createElement('div');
@@ -6242,12 +6270,12 @@ function rebuildLyricSourceOptions(metaEvs) {
 
     if (statusEl) {
       statusEl.textContent = pl.length
-        ? `Items: ${pl.length} • ${idx >= 0 ? `Selected ${idx+1}/${pl.length}` : 'Idle'}`
+        ? `Items: ${pl.length} â€¢ ${idx >= 0 ? `Selected ${idx+1}/${pl.length}` : 'Idle'}`
         : 'Playlist empty';
     }
   }
 
-  /* ========= Fullscreen button wire-up (⛶ targets whole window) ========= */
+  /* ========= Fullscreen button wire-up (â›¶ targets whole window) ========= */
   if (btnFS) {
     btnFS.addEventListener('click', async () => {
       try {
@@ -6476,7 +6504,7 @@ function rebuildLyricSourceOptions(metaEvs) {
 
       // Unmute + very low ambience volume (requires user gesture)
       video.muted = false;
-      video.volume = 0.001;  // 2% ambience; adjust 0.01–0.03 as you like
+      video.volume = 0.001;  // 2% ambience; adjust 0.01â€“0.03 as you like
 
       // Try to play (gesture-backed); ignore errors silently
       await video.play().catch(()=>{});
@@ -6568,3 +6596,5 @@ if (!window.__chanInspectInterval) {
 </script>
 </body>
 </html>
+
+
