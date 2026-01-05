@@ -2,8 +2,6 @@
 
 ## 🔗 Live Demo
 
-[Click here to launch KaraokeHD](https://sempogi.github.io/KaraokeHd/index.html)
-
 <p align="center">
   <a href="https://sempogi.github.io/KaraokeHd/index.html">
     <img src="https://img.shields.io/badge/Open%20KaraokeHD-Click%20Here-brightgreen?style=for-the-badge" alt="Open KaraokeHD">
