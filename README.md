@@ -57,7 +57,7 @@
 ![Karaoke Display](karaoke.jpg)
 
 ### Recorder Feature
-![Recorder](recorder.jpg)
+![Recorder](recoder.jpg)
 
 ### Video Background Support
 ![Video Background](video.jpg)
