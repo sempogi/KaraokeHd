@@ -196,6 +196,8 @@ SOFTWARE.
   }
   .winHeader strong { font-size: 12px; }
   .winBtns { display: flex; gap: 6px; }
+  /* Ensure header buttons receive pointer events and sit above header drag area */
+  .winBtns button { position: relative; z-index: 3; pointer-events: auto; }
   .winBody { padding: 8px; }
 
   #chGridVert {
@@ -271,6 +273,32 @@ SOFTWARE.
     border-radius: 999px;
     padding: 2px 6px;
     font-size: 9px;
+  }
+  .readout {
+    display:inline-block;
+    min-width:44px;
+    text-align:right;
+    font-size:11px;
+    color: #dfeefc;
+    background: rgba(0,0,0,0.15);
+    padding: 2px 6px;
+    border-radius: 6px;
+    margin-left:6px;
+  }
+  #compBypassIndicator { font-weight:600; }
+  .cmp-led {
+    display:inline-block;
+    width:10px;
+    height:10px;
+    border-radius:50%;
+    background:#6b1f1f;
+    box-shadow:0 0 3px rgba(0,0,0,0.6) inset;
+    margin-right:8px;
+    vertical-align:middle;
+  }
+  .cmp-led.on {
+    background:#2fe02f;
+    box-shadow:0 0 8px #2fe02f;
   }
   .ctlV {
     display: flex;
@@ -629,7 +657,7 @@ SOFTWARE.
 #winKaro .karoSimpleBtn {
   position: absolute;
   z-index: 4;
-  top: 8px;
+  top: 45px;
   right: 8px;
   width: 30px;
   height: 30px;
@@ -856,6 +884,41 @@ Retune detect: --
 <span class="chip" id="activeSummary">Now 0</span>
 <button id="btnResetUsed" class="btn">↺</button>
 </div>
+  <div style="display:flex;gap:8px;align-items:center;margin-bottom:6px">
+  <span id="compBypassIndicator" class="chip" title="Compressor bypass"><span id="compLed" class="cmp-led" aria-hidden="true"></span> CMP: OFF</span>
+</div>
+<div style="display:flex;gap:8px;align-items:center;margin-bottom:8px">
+  <label style="display:flex;align-items:center;gap:6px" title="Precompute common noise buffers at audio init">
+    <input id="precomputeNoise" type="checkbox" />
+    Precompute noise buffers
+  </label>
+</div>
+<!-- Master compressor controls -->
+<div id="masterCompControls" class="row" style="gap:8px;margin-bottom:8px;align-items:center;">
+  <label style="display:flex;align-items:center;gap:8px">Bypass
+    <input id="compBypass" type="checkbox" style="margin-left:6px" />
+  </label>
+  <label>Thresh
+    <input id="compThresh" type="range" min="-40" max="0" step="0.5" value="-8" />
+    <span class="readout" id="compThreshVal">-8</span>
+  </label>
+  <label>Ratio
+    <input id="compRatio" type="range" min="1" max="20" step="0.1" value="6" />
+    <span class="readout" id="compRatioVal">6.0</span>
+  </label>
+  <label>Knee
+    <input id="compKnee" type="range" min="0" max="40" step="0.5" value="3" />
+    <span class="readout" id="compKneeVal">3.0</span>
+  </label>
+  <label>Attack
+    <input id="compAttack" type="range" min="0.001" max="0.1" step="0.001" value="0.003" />
+    <span class="readout" id="compAttackVal">0.003</span>
+  </label>
+  <label>Release
+    <input id="compRelease" type="range" min="0.01" max="1.0" step="0.01" value="0.25" />
+    <span class="readout" id="compReleaseVal">0.25</span>
+  </label>
+</div>
 <div id="chGridVert" aria-label="Channel Mixer"></div>
 </div>
 </div>
@@ -1053,6 +1116,16 @@ w.style.zIndex = (++zCounter).toString();
 
     hdr.addEventListener('pointerdown', (e) => {
       try {
+        // Robust: don't start dragging when the pointer event originated on a button
+        const path = e.composedPath ? e.composedPath() : (e.path || []);
+        for (const node of path) {
+          if (!node || !node.tagName) continue;
+          const t = node.tagName && node.tagName.toUpperCase();
+          if (t === 'BUTTON') return;
+          if (node.getAttribute && (node.getAttribute('role') === 'button')) return;
+          if (node.classList && node.classList.contains('btn')) return;
+        }
+
         dragging = true;
         w.style.zIndex = (++zCounter).toString();
 
@@ -1123,7 +1196,7 @@ function chanFallbackInst(ch) {
 }
 
 
-let audioCtx = null; let masterIn = null; let masterOut = null; let transport = null; let hpf = null; let notch = null; let clip = null; let analyser = null;
+let audioCtx = null; let masterIn = null; let masterOut = null; let transport = null; let hpf = null; let notch = null; let clip = null; let analyser = null; let masterComp = null;
 let mediaDest = null; let mediaRecorder = null; let recChunks = [];
 const EQ_FREQS = [31, 62, 125, 250, 500, 1000, 2000, 4000, 8000, 16000]; let eqBands = [];
 let useTriangle = false; let antiBeep = true; let autoRecovery = true; let autoAssign = true; let palette = 'classic';
@@ -1228,6 +1301,17 @@ solfFreq: 528,
 solfLevel: 0.12,
 tuneEnable: false,
 tuneFreq: 528
+    ,
+    // Master compressor defaults
+    compBypass: false,
+    compThresh: -8,
+    compKnee: 3,
+    compRatio: 6,
+    compAttack: 0.003,
+    compRelease: 0.25
+    ,
+    // Precompute noise buffers at init to avoid first-hit allocations
+    precomputeNoise: true
 },
 windows: {}
 };
@@ -1396,7 +1480,89 @@ if (!channels[ch].locked) maybeAutoAssign(ch); titleBadges[ch].textContent = ins
 }
 }); for (let i = 0; i < 10; i++) {
 const el = document.getElementById('eq10_'+i); if (el) el.addEventListener('input', onEq10Slider);
-} document.getElementById('density').addEventListener('change', (e)=> {
+}
+
+// --- Compressor UI bindings will be attached if elements exist ---
+{
+  const cbBy = document.getElementById('compBypass');
+  const sThresh = document.getElementById('compThresh');
+  const sRatio = document.getElementById('compRatio');
+  const sKnee = document.getElementById('compKnee');
+  const sAtt = document.getElementById('compAttack');
+  const sRel = document.getElementById('compRelease');
+
+  if (cbBy) {
+    cbBy.checked = !!settings.audio.compBypass;
+    cbBy.addEventListener('change', (e)=>{
+      settings.audio.compBypass = !!e.target.checked; persistSettings();
+      try {
+        try { notch.disconnect(); } catch(_) {}
+        try { masterComp.disconnect(); } catch(_) {}
+        const ind = document.getElementById('compBypassIndicator'); const led = document.getElementById('compLed');
+        if (settings.audio.compBypass) {
+          notch.connect(clip);
+          if (ind) ind.textContent = 'CMP: BYP';
+          if (led) led.classList.remove('on');
+        } else {
+          notch.connect(masterComp);
+          masterComp.connect(clip);
+          if (ind) ind.textContent = 'CMP: ON';
+          if (led) led.classList.add('on');
+        }
+      } catch(_) {}
+    });
+  }
+
+  function applyCompParams() {
+    if (!masterComp) return;
+    try {
+      masterComp.threshold.value = parseFloat(sThresh?.value || settings.audio.compThresh || -8);
+      masterComp.knee.value      = parseFloat(sKnee?.value || settings.audio.compKnee || 3);
+      masterComp.ratio.value     = parseFloat(sRatio?.value || settings.audio.compRatio || 6);
+      masterComp.attack.value    = parseFloat(sAtt?.value || settings.audio.compAttack || 0.003);
+      masterComp.release.value   = parseFloat(sRel?.value || settings.audio.compRelease || 0.25);
+    } catch(_) {}
+  }
+
+  if (sThresh) { sThresh.value = String(settings.audio.compThresh); sThresh.addEventListener('input',(e)=>{ settings.audio.compThresh = parseFloat(e.target.value||'-8'); persistSettings(); applyCompParams(); }); }
+  if (sRatio)  { sRatio.value = String(settings.audio.compRatio);  sRatio.addEventListener('input',(e)=>{ settings.audio.compRatio = parseFloat(e.target.value||'6'); persistSettings(); applyCompParams(); }); }
+  if (sKnee)   { sKnee.value = String(settings.audio.compKnee);   sKnee.addEventListener('input',(e)=>{ settings.audio.compKnee = parseFloat(e.target.value||'3'); persistSettings(); applyCompParams(); }); }
+  if (sAtt)    { sAtt.value = String(settings.audio.compAttack);  sAtt.addEventListener('input',(e)=>{ settings.audio.compAttack = parseFloat(e.target.value||'0.003'); persistSettings(); applyCompParams(); }); }
+  if (sRel)    { sRel.value = String(settings.audio.compRelease); sRel.addEventListener('input',(e)=>{ settings.audio.compRelease = parseFloat(e.target.value||'0.25'); persistSettings(); applyCompParams(); }); }
+
+  try { applyCompParams(); } catch(_) {}
+  // Update readouts and indicator initially
+  try {
+    const vThresh = document.getElementById('compThreshVal'); if (vThresh && sThresh) vThresh.textContent = `${parseFloat(sThresh.value).toFixed(1)} dB`;
+    const vRatio = document.getElementById('compRatioVal'); if (vRatio && sRatio) vRatio.textContent = `${parseFloat(sRatio.value).toFixed(1)}:1`;
+    const vKnee = document.getElementById('compKneeVal'); if (vKnee && sKnee) vKnee.textContent = `${parseFloat(sKnee.value).toFixed(1)} dB`;
+    const vAtt = document.getElementById('compAttackVal'); if (vAtt && sAtt) vAtt.textContent = `${(parseFloat(sAtt.value)*1000).toFixed(1)} ms`;
+    const vRel = document.getElementById('compReleaseVal'); if (vRel && sRel) vRel.textContent = `${(parseFloat(sRel.value)*1000).toFixed(1)} ms`;
+    const ind = document.getElementById('compBypassIndicator'); const led = document.getElementById('compLed');
+    if (ind) ind.textContent = settings.audio.compBypass? 'CMP: BYP' : 'CMP: ON';
+    if (led) { if (settings.audio.compBypass) led.classList.remove('on'); else led.classList.add('on'); }
+  } catch(_) {}
+
+  // Live update readouts on input
+  if (sThresh) sThresh.addEventListener('input', (e)=>{ const el=document.getElementById('compThreshVal'); if(el) el.textContent=`${parseFloat(e.target.value).toFixed(1)} dB`; });
+  if (sRatio)  sRatio.addEventListener('input', (e)=>{ const el=document.getElementById('compRatioVal'); if(el) el.textContent=`${parseFloat(e.target.value).toFixed(1)}:1`; });
+  if (sKnee)   sKnee.addEventListener('input', (e)=>{ const el=document.getElementById('compKneeVal'); if(el) el.textContent=`${parseFloat(e.target.value).toFixed(1)} dB`; });
+  if (sAtt)    sAtt.addEventListener('input', (e)=>{ const el=document.getElementById('compAttackVal'); if(el) el.textContent=`${(parseFloat(e.target.value)*1000).toFixed(1)} ms`; });
+  if (sRel)    sRel.addEventListener('input', (e)=>{ const el=document.getElementById('compReleaseVal'); if(el) el.textContent=`${(parseFloat(e.target.value)*1000).toFixed(1)} ms`; });
+
+  // Wire precompute checkbox (Mixer)
+  const precomputeEl = document.getElementById('precomputeNoise');
+  if (precomputeEl) {
+    precomputeEl.checked = !!settings.audio.precomputeNoise;
+    precomputeEl.addEventListener('change', (e) => {
+      settings.audio.precomputeNoise = !!e.target.checked; persistSettings();
+      const ind = document.getElementById('compBypassIndicator'); if (ind) ind.textContent = settings.audio.precomputeNoise? 'CMP: ON' : 'CMP: ON';
+      // No immediate action required; precompute happens at initAudioChain time.
+    });
+  }
+}
+
+document.getElementById('density').addEventListener('change', (e)=> {
 settings.ui.density = e.target.value; persistSettings(); applyDensity(settings.ui.density);
 }); document.getElementById('fit16').addEventListener('change', (e)=> {
 settings.ui.fit16 = e.target.checked; persistSettings(); fit16Active = settings.ui.fit16; autoFit16();
@@ -1697,10 +1863,18 @@ function initAudioChain() {
   notch.frequency.value = (notchSel > 0 ? notchSel : 1000);
   notch.Q.value         = (notchSel > 0 ? 28      : 0.0001);
 
+  // Master compressor (gentle) inserted before soft-clip
+  masterComp = audioCtx.createDynamicsCompressor();
+  // Initialize from settings (fall back to sensible defaults)
+  masterComp.threshold.value = parseFloat(settings.audio.compThresh ?? -8);
+  masterComp.knee.value      = parseFloat(settings.audio.compKnee ?? 3);
+  masterComp.ratio.value     = parseFloat(settings.audio.compRatio ?? 6);
+  masterComp.attack.value    = parseFloat(settings.audio.compAttack ?? 0.003);
+  masterComp.release.value   = parseFloat(settings.audio.compRelease ?? 0.25);
+
   clip = audioCtx.createWaveShaper();
-  
   clip.curve = makeSoftClipCurve(parseFloat(document.getElementById('limStr')?.value || '0.80'), 8192, 1.08);
-clip.oversample = '4x';
+  clip.oversample = '4x';
 
   // Analyser + transport + destinations
   analyser   = audioCtx.createAnalyser();
@@ -1713,13 +1887,44 @@ clip.oversample = '4x';
   masterOut  = audioCtx.destination;
   mediaDest  = audioCtx.createMediaStreamDestination();
 
+  // Precompute common noise buffers to avoid first-hit allocation spikes
+  (function precomputeNoiseBuffers() {
+    try {
+      if (!settings.audio?.precomputeNoise) return; // respect user toggle
+      const sr = audioCtx.sampleRate;
+      const list = [
+        ['click_4ms', 4, 0.0],
+        ['rimshot_65ms', 65, 0.10],
+        ['snare_tap_45ms', 45, 0.14],
+        ['snare_260ms', 260, 0.20],
+        ['snare_hf_20ms', 20, 0.0],
+        ['hat_160ms', 160, 0.12],
+        ['hat_320ms', 320, 0.12],
+        ['crash_1500ms', 1500, 0.10],
+        ['ride_1100ms', 1100, 0.10],
+        ['chick_80ms', 80, 0.10]
+      ];
+      for (const [k, d, c] of list) {
+        try { getNoiseBuffer(k, sr, d, c); } catch (_) {}
+      }
+    } catch(_) {}
+  })();
+
   // Chain: masterIn → EQ → HPF → Notch → Clip → (analyser?) → transport → outputs
   let node = masterIn;
   for (const b of eqBands) {
     node.connect(b);
     node = b;
   }
-  node.connect(hpf).connect(notch).connect(clip);
+  // Insert compressor before the soft-clip to tame peaks
+  node.connect(hpf).connect(notch).connect(masterComp).connect(clip);
+
+  // Respect compressor bypass setting: if bypassed, route notch → clip directly
+  if (settings.audio.compBypass) {
+    try { masterComp.disconnect(); } catch(_) {}
+    try { notch.disconnect(); } catch(_) {}
+    try { notch.connect(clip); } catch(_) {}
+  }
 
   // === IMPORTANT: only now set flags and wire final stage ===
   drawVizEnabled   = !settings.ui.audioOnly;
@@ -3363,10 +3568,8 @@ function guitarLiteVoice(ch, note, vel, when) {
   // --- Pick/attack noise (short, bright)
   const ns = audioCtx.createBufferSource();
   const sr = audioCtx.sampleRate;
-  const nlen = Math.floor(sr * 0.010);
-  const nbuf = audioCtx.createBuffer(1, nlen, sr);
-  const nd = nbuf.getChannelData(0);
-  for (let i = 0; i < nlen; i++) nd[i] = (Math.random() * 2 - 1);
+  // Use cached short pick noise to avoid per-note allocations
+  const nbuf = getNoiseBuffer('pick_10ms', sr, 10, 0.0);
   ns.buffer = nbuf;
 
   const nHP = audioCtx.createBiquadFilter();
@@ -3503,12 +3706,8 @@ if (!stopRegistry[ch]) {
     try {
       const click = audioCtx.createBufferSource();
       const sr = audioCtx.sampleRate;
-      const clen = Math.floor(sr * 0.004); // 4 ms burst
-      const cbuf = audioCtx.createBuffer(1, clen, sr);
-      const cd = cbuf.getChannelData(0);
-      for (let i = 0; i < clen; i++) {
-        cd[i] = (Math.random() * 2 - 1) * (1 - (i / clen)); // decaying noise
-      }
+      // Reuse cached short click buffer to avoid per-hit allocations
+      const cbuf = getNoiseBuffer('click_4ms', sr, 4, 0.0);
       const chp = audioCtx.createBiquadFilter();
       chp.type = 'highpass';
       chp.frequency.value = 2000; // 1.8–2.2k Hz range
@@ -3534,16 +3733,11 @@ if (!stopRegistry[ch]) {
 // Place this BEFORE your existing "SNARE: notes 38/40" block.
 // === Snare Roll: note 38 @ high velocity (multi-tap buzz) ===
 // === Rimshot / Side Stick: note 37 (bright snap) ===
-if (note === 37) {
-  const sr = audioCtx.sampleRate;
+  if (note === 37) {
+  const sr   = audioCtx.sampleRate;
   const dur = 0.065;
-  const len = Math.floor(sr * dur);
-  const buf = audioCtx.createBuffer(1, len, sr);
-  const d   = buf.getChannelData(0);
-  for (let i = 0; i < len; i++) {
-    const r = Math.random() * 2 - 1;
-    d[i] = (i > 0 ? d[i - 1] * 0.10 + r * 0.90 : r);
-  }
+  // Reuse cached buffer for rimshot/side-stick body
+  const buf = getNoiseBuffer('rimshot_65ms', sr, Math.floor(dur*1000), 0.10);
   const noise = audioCtx.createBufferSource(); noise.buffer = buf;
 
   const bp = audioCtx.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = 2400; bp.Q.value = 0.8;
@@ -3587,16 +3781,9 @@ if (note === 38 && vel >= 110) {
     const env     = Math.sin(phase * Math.PI) * 0.85 + 0.15;   // swell toward middle
     const tapGain = env * 0.75 * v;
 
-    const len  = Math.floor(sr * tapDur);
-    const buf  = audioCtx.createBuffer(1, len, sr);
-    const d    = buf.getChannelData(0);
-    for (let j = 0; j < len; j++) {
-      const r = Math.random() * 2 - 1;
-      d[j] = (j > 0 ? d[j - 1] * 0.14 + r * 0.86 : r);
-    }
-
+    // Reuse precomputed snare tap buffer to avoid repeated allocations
     const noise = audioCtx.createBufferSource();
-    noise.buffer = buf;
+    noise.buffer = getNoiseBuffer('snare_tap_45ms', sr, Math.floor(tapDur*1000), 0.14);
 
     const bp = audioCtx.createBiquadFilter();
     bp.type = 'bandpass';
@@ -3630,15 +3817,8 @@ if (note === 38 && vel >= 110) {
   if (note === 38 || note === 40) {
     const sr = audioCtx.sampleRate;
     const len = Math.floor(sr * 0.26);
-    const buf = audioCtx.createBuffer(1, len, sr);
-    const d = buf.getChannelData(0);
-    for (let i = 0; i < len; i++) {
-      const r = Math.random() * 2 - 1;
-      d[i] = (i > 0 ? d[i - 1] * 0.20 + r * 0.80 : r);
-    }
-
-    const noise = audioCtx.createBufferSource();
-    noise.buffer = buf;
+      const buf = getNoiseBuffer('snare_260ms', sr, Math.floor(260), 0.20);
+      const noise = audioCtx.createBufferSource(); noise.buffer = buf;
 
     const bp = audioCtx.createBiquadFilter();
     bp.type = 'bandpass';
@@ -3676,10 +3856,7 @@ if (note === 38 && vel >= 110) {
       rG.gain.setValueAtTime(0.10 * v, when);
       rG.gain.exponentialRampToValueAtTime(0.00012, when + 0.10);
       // small independent 20ms HF burst
-      const rlen = Math.floor(sr * 0.020);
-      const rbuf = audioCtx.createBuffer(1, rlen, sr);
-      const rd = rbuf.getChannelData(0);
-      for (let i = 0; i < rlen; i++) rd[i] = Math.random() * 2 - 1;
+      const rbuf = getNoiseBuffer('snare_hf_20ms', sr, 20, 0.0);
       const ratt = audioCtx.createBufferSource();
       ratt.buffer = rbuf;
       ratt.connect(rHP).connect(rG).connect(dest);
@@ -3706,16 +3883,9 @@ if (note === 38 && vel >= 110) {
 
     const dur = (note === 46 ? Math.max(minDur, 0.32) : Math.max(minDur, 0.16));
     const sr = audioCtx.sampleRate;
-    const len = Math.floor(sr * dur);
-    const buf = audioCtx.createBuffer(1, len, sr);
-    const d = buf.getChannelData(0);
-    for (let i = 0; i < len; i++) {
-      const r = Math.random() * 2 - 1;
-      d[i] = (i > 0 ? d[i - 1] * 0.12 + r * 0.88 : r);
-    }
-
     const noise = audioCtx.createBufferSource();
-    noise.buffer = buf;
+    // use cached hat buffer (160ms or 320ms) to reduce allocations
+    noise.buffer = getNoiseBuffer((note === 46) ? 'hat_320ms' : 'hat_160ms', sr, Math.floor(dur*1000), 0.12);
 
     const hp = audioCtx.createBiquadFilter();
     hp.type = 'highpass';
@@ -3748,16 +3918,8 @@ if (note === 38 && vel >= 110) {
   if (note === 49 || note === 51) {
     const dur = (note === 49 ? 1.5 : 1.1);
     const sr = audioCtx.sampleRate;
-    const len = Math.floor(sr * dur);
-    const buf = audioCtx.createBuffer(1, len, sr);
-    const d = buf.getChannelData(0);
-    for (let i = 0; i < len; i++) {
-      const r = Math.random() * 2 - 1;
-      d[i] = (i > 0 ? d[i - 1] * 0.10 + r * 0.90 : r);
-    }
-
     const noise = audioCtx.createBufferSource();
-    noise.buffer = buf;
+    noise.buffer = getNoiseBuffer((note === 49) ? 'crash_1500ms' : 'ride_1100ms', sr, Math.floor(dur*1000), 0.10);
 
     const hp = audioCtx.createBiquadFilter();
     hp.type = 'highpass';
@@ -3819,18 +3981,8 @@ if (note === 44) {
   // Very short hi-hat "chick": ~80ms, high-pass filtered noise
   const dur = Math.max(MIN_NOTE_MS_DRUMS/1000, 0.08); // ~80ms
   const sr  = audioCtx.sampleRate;
-  const len = Math.floor(sr * dur);
-  const buf = audioCtx.createBuffer(1, len, sr);
-  const d   = buf.getChannelData(0);
-
-  // Smooth-ish white noise (slight correlation softens hashy edge)
-  for (let i = 0; i < len; i++) {
-    const r = Math.random() * 2 - 1;
-    d[i] = (i > 0 ? d[i - 1] * 0.10 + r * 0.90 : r);
-  }
-
   const noise = audioCtx.createBufferSource();
-  noise.buffer = buf;
+    noise.buffer = getNoiseBuffer('chick_80ms', sr, Math.floor(dur*1000), 0.10);
 
   const hp = audioCtx.createBiquadFilter();
   hp.type = 'highpass';
@@ -3871,14 +4023,8 @@ if (note === 39) {
   for (let i = 0; i < taps.length; i++) {
     const startT = when + taps[i].t;
     const len    = Math.floor(sr * tapDur);
-
-    // White noise with slight correlation (softens hashy edge)
-    const buf = audioCtx.createBuffer(1, len, sr);
-    const d   = buf.getChannelData(0);
-    for (let j = 0; j < len; j++) {
-      const r = Math.random() * 2 - 1;
-      d[j] = (j > 0 ? d[j - 1] * 0.12 + r * 0.88 : r);
-    }
+    // Use shared precomputed noise buffer to avoid per-hit allocation
+    const buf = getNoiseBuffer('clap_75ms', sr, Math.round(tapDur * 1000), 0.12);
 
     const noise = audioCtx.createBufferSource();
     noise.buffer = buf;
@@ -3919,8 +4065,7 @@ if (note === 39) {
 // === Chinese Cymbal: 52 (trashier, longer) ===
 if (note === 52) {
   const dur = 1.6, sr = audioCtx.sampleRate, len = Math.floor(sr * dur);
-  const buf = audioCtx.createBuffer(1, len, sr); const d = buf.getChannelData(0);
-  for (let i = 0; i < len; i++) { const r = Math.random() * 2 - 1; d[i] = (i > 0 ? d[i - 1] * 0.14 + r * 0.86 : r); }
+  const buf = getNoiseBuffer('chineseCymbal_1600ms', sr, Math.round(dur * 1000), 0.14);
   const noise = audioCtx.createBufferSource(); noise.buffer = buf;
   const hp = audioCtx.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.value = 4200;
   const g = audioCtx.createGain(); g.gain.setValueAtTime(0.62 * v, when); g.gain.exponentialRampToValueAtTime(0.00012, when + dur);
@@ -3942,8 +4087,7 @@ if (note === 53) {
 // === Splash: 55 (short crash) ===
 if (note === 55) {
   const dur = 0.9, sr = audioCtx.sampleRate, len = Math.floor(sr * dur);
-  const buf = audioCtx.createBuffer(1, len, sr); const d = buf.getChannelData(0);
-  for (let i = 0; i < len; i++) { const r = Math.random() * 2 - 1; d[i] = (i > 0 ? d[i - 1] * 0.10 + r * 0.90 : r); }
+  const buf = getNoiseBuffer('splash_900ms', sr, Math.round(dur * 1000), 0.10);
   const noise = audioCtx.createBufferSource(); noise.buffer = buf;
   const hp = audioCtx.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.value = 5200;
   const g = audioCtx.createGain(); g.gain.setValueAtTime(0.60 * v, when); g.gain.exponentialRampToValueAtTime(0.00012, when + dur);
@@ -3966,8 +4110,7 @@ if (note === 56) {
 // === Crash 2: 57 ===
 if (note === 57) {
   const dur = 1.4, sr = audioCtx.sampleRate, len = Math.floor(sr * dur);
-  const buf = audioCtx.createBuffer(1, len, sr); const d = buf.getChannelData(0);
-  for (let i = 0; i < len; i++) { const r = Math.random() * 2 - 1; d[i] = (i > 0 ? d[i - 1] * 0.12 + r * 0.88 : r); }
+  const buf = getNoiseBuffer('crash2_1400ms', sr, Math.round(dur * 1000), 0.12);
   const noise = audioCtx.createBufferSource(); noise.buffer = buf;
   const hp = audioCtx.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.value = 5000;
   const g = audioCtx.createGain(); g.gain.setValueAtTime(0.62 * v, when); g.gain.exponentialRampToValueAtTime(0.00012, when + dur);
@@ -3978,8 +4121,7 @@ if (note === 57) {
 // === Vibra-slap: 58 (rattle tail) ===
 if (note === 58) {
   const dur = 1.0, sr = audioCtx.sampleRate, len = Math.floor(sr * dur);
-  const buf = audioCtx.createBuffer(1, len, sr); const d = buf.getChannelData(0);
-  for (let i = 0; i < len; i++) { const r = Math.random()*2-1; d[i] = (i>0 ? d[i-1]*0.18 + r*0.82 : r); }
+  const buf = getNoiseBuffer('vibraslap_1000ms', sr, Math.round(dur * 1000), 0.18);
   const noise = audioCtx.createBufferSource(); noise.buffer = buf;
   const lp = audioCtx.createBiquadFilter(); lp.type='lowpass'; lp.frequency.value = 1200;
   const g  = audioCtx.createGain(); g.gain.setValueAtTime(0.42 * v, when); g.gain.exponentialRampToValueAtTime(0.00012, when + dur);
@@ -3991,8 +4133,7 @@ if (note === 58) {
 // === Ride Cymbal 2: 59 (slightly darker) ===
 if (note === 59) {
   const dur = 1.0, sr = audioCtx.sampleRate, len = Math.floor(sr * dur);
-  const buf = audioCtx.createBuffer(1, len, sr); const d = buf.getChannelData(0);
-  for (let i = 0; i < len; i++) { const r = Math.random() * 2 - 1; d[i] = (i > 0 ? d[i - 1] * 0.12 + r * 0.88 : r); }
+  const buf = getNoiseBuffer('ride_1000ms', sr, Math.round(dur * 1000), 0.12);
   const noise = audioCtx.createBufferSource(); noise.buffer = buf;
   const hp = audioCtx.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.value = 4600;
   const g = audioCtx.createGain(); g.gain.setValueAtTime(0.60 * v, when); g.gain.exponentialRampToValueAtTime(0.00012, when + dur);
@@ -4051,8 +4192,7 @@ if (note === 54) {
   const tapDur = 0.080;
   for (let i = 0; i < taps.length; i++) {
     const startT = when + taps[i], len = Math.floor(sr * tapDur);
-    const buf = audioCtx.createBuffer(1, len, sr), d = buf.getChannelData(0);
-    for (let j = 0; j < len; j++) { const r = Math.random()*2-1; d[j] = (j>0 ? d[j-1]*0.10 + r*0.90 : r); }
+    const buf = getNoiseBuffer('tamb_tap_80ms', sr, Math.round(tapDur * 1000), 0.10);
     const noise = audioCtx.createBufferSource(); noise.buffer = buf;
     const hp = audioCtx.createBiquadFilter(); hp.type='highpass'; hp.frequency.value=6000;
     const g = audioCtx.createGain(); g.gain.setValueAtTime(0.50 * v, startT); g.gain.exponentialRampToValueAtTime(0.00012, startT + tapDur);
@@ -4068,8 +4208,7 @@ if (note === 54) {
 // === Cabasa: 69 (shaker sweep) ===
 if (note === 69) {
   const dur = 0.20, sr = audioCtx.sampleRate, len = Math.floor(sr * dur);
-  const buf = audioCtx.createBuffer(1, len, sr); const d = buf.getChannelData(0);
-  for (let i=0;i<len;i++){const r=Math.random()*2-1; d[i]=(i>0?d[i-1]*0.10 + r*0.90:r);}
+  const buf = getNoiseBuffer('cabasa_200ms', sr, Math.round(dur * 1000), 0.10);
   const noise = audioCtx.createBufferSource(); noise.buffer = buf;
   const hp = audioCtx.createBiquadFilter(); hp.type='highpass'; hp.frequency.value=4500;
   const g  = audioCtx.createGain(); g.gain.setValueAtTime(0.40 * v, when); g.gain.exponentialRampToValueAtTime(0.00012, when+dur);
@@ -4081,8 +4220,7 @@ if (note === 69) {
 // === Maracas: 70 (short shake) ===
 if (note === 70) {
   const dur = 0.12, sr = audioCtx.sampleRate, len = Math.floor(sr * dur);
-  const buf = audioCtx.createBuffer(1, len, sr); const d = buf.getChannelData(0);
-  for (let i=0;i<len;i++){const r=Math.random()*2-1; d[i]=(i>0?d[i-1]*0.10 + r*0.90:r);}
+  const buf = getNoiseBuffer('maracas_120ms', sr, Math.round(dur * 1000), 0.10);
   const noise = audioCtx.createBufferSource(); noise.buffer = buf;
   const bp = audioCtx.createBiquadFilter(); bp.type='bandpass'; bp.frequency.value=3000; bp.Q.value=1.0;
   const g  = audioCtx.createGain(); g.gain.setValueAtTime(0.38 * v, when); g.gain.exponentialRampToValueAtTime(0.00012, when+dur);
@@ -4116,8 +4254,7 @@ if (note === 73 || note === 74) {
   for (let i = 0; i < segs; i++) {
     const startT = when + i * (segDur - 0.02);
     const len = Math.floor(sr * segDur);
-    const buf = audioCtx.createBuffer(1, len, sr); const d = buf.getChannelData(0);
-    for (let j=0;j<len;j++){const r=Math.random()*2-1; d[j]=(j>0?d[j-1]*0.20 + r*0.80:r);}
+    const buf = getNoiseBuffer('guiro_seg_80ms', sr, Math.round(segDur * 1000), 0.20);
     const noise = audioCtx.createBufferSource(); noise.buffer = buf;
     const bp = audioCtx.createBiquadFilter(); bp.type='bandpass'; bp.frequency.value=1700; bp.Q.value=0.9;
     const g  = audioCtx.createGain(); g.gain.setValueAtTime(0.35 * v, startT); g.gain.exponentialRampToValueAtTime(0.00012, startT+segDur);
