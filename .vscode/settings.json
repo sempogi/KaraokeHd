@@ -1,3 +1,5 @@
 {
-    "chat.agent.maxRequests": 200
+    "chat.agent.maxRequests": 200,
+    "github.copilot.chat.useResponsesApi": true,
+    "github.copilot.editor.enableCodeActions": false
 }

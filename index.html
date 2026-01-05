@@ -886,43 +886,43 @@ Retune detect: --
 <span class="chip" id="usedSummary">Used 0/16</span>
 <span class="chip" id="activeSummary">Now 0</span>
 <button id="btnResetUsed" class="btn">↺</button>
-<button id="btnSmokeTest" class="btn" title="Run smoke test">Test</button>
+<button id="btnSmokeTest" class="btn primary" title="Run smoke test">Run Smoke Test</button>
 </div>
   <div style="display:flex;gap:8px;align-items:center;margin-bottom:6px">
   <span id="compBypassIndicator" class="chip" title="Compressor bypass"><span id="compLed" class="cmp-led" aria-hidden="true"></span> CMP: OFF</span>
 </div>
-<div style="display:flex;gap:8px;align-items:center;margin-bottom:8px">
-  <label style="display:flex;align-items:center;gap:6px" title="Precompute common noise buffers at audio init">
-    <input id="precomputeNoise" type="checkbox" />
-    Precompute noise buffers
-  </label>
-</div>
-<!-- Master compressor controls -->
-<div id="masterCompControls" class="row" style="gap:8px;margin-bottom:8px;align-items:center;">
-  <label style="display:flex;align-items:center;gap:8px">Bypass
-    <input id="compBypass" type="checkbox" style="margin-left:6px" />
-  </label>
-  <label>Thresh
-    <input id="compThresh" type="range" min="-40" max="0" step="0.5" value="-8" />
-    <span class="readout" id="compThreshVal">-8</span>
-  </label>
-  <label>Ratio
-    <input id="compRatio" type="range" min="1" max="20" step="0.1" value="6" />
-    <span class="readout" id="compRatioVal">6.0</span>
-  </label>
-  <label>Knee
-    <input id="compKnee" type="range" min="0" max="40" step="0.5" value="3" />
-    <span class="readout" id="compKneeVal">3.0</span>
-  </label>
-  <label>Attack
-    <input id="compAttack" type="range" min="0.001" max="0.1" step="0.001" value="0.003" />
-    <span class="readout" id="compAttackVal">0.003</span>
-  </label>
-  <label>Release
-    <input id="compRelease" type="range" min="0.01" max="1.0" step="0.01" value="0.25" />
-    <span class="readout" id="compReleaseVal">0.25</span>
-  </label>
-</div>
+<details style="margin-bottom:8px;">
+  <summary style="font-weight:bold;cursor:pointer;">Compressor & Noise Controls</summary>
+  <div style="display:flex;flex-direction:column;gap:8px;padding:8px 0 0 0;">
+    <label style="display:flex;align-items:center;gap:6px" title="Precompute common noise buffers at audio init">
+      <input id="precomputeNoise" type="checkbox" />
+      Precompute noise buffers
+    </label>
+    <label style="display:flex;align-items:center;gap:8px">Bypass
+      <input id="compBypass" type="checkbox" style="margin-left:6px" />
+    </label>
+    <label>Thresh
+      <input id="compThresh" type="range" min="-40" max="0" step="0.5" value="-8" />
+      <span class="readout" id="compThreshVal">-8</span>
+    </label>
+    <label>Ratio
+      <input id="compRatio" type="range" min="1" max="20" step="0.1" value="6" />
+      <span class="readout" id="compRatioVal">6.0</span>
+    </label>
+    <label>Knee
+      <input id="compKnee" type="range" min="0" max="40" step="0.5" value="3" />
+      <span class="readout" id="compKneeVal">3.0</span>
+    </label>
+    <label>Attack
+      <input id="compAttack" type="range" min="0.001" max="0.1" step="0.001" value="0.003" />
+      <span class="readout" id="compAttackVal">0.003</span>
+    </label>
+    <label>Release
+      <input id="compRelease" type="range" min="0.01" max="1.0" step="0.01" value="0.25" />
+      <span class="readout" id="compReleaseVal">0.25</span>
+    </label>
+  </div>
+</details>
 <div id="chGridVert" aria-label="Channel Mixer"></div>
 </div>
 </div>
@@ -933,6 +933,16 @@ Retune detect: --
 </div>
 <div class="winBody">
 <div class="row" style="flex-direction:column;gap:6px;font-size:10px">
+<label>Preset
+<select id="eqwin-preset">
+  <option value="Flat" selected>Flat</option>
+  <option value="Warm">Warm</option>
+  <option value="Bright">Bright</option>
+  <option value="Vocal">Vocal</option>
+  <option value="BassBoost">Bass+</option>
+  <option value="BassStrong">Bass++</option>
+</select>
+</label>
 <label>31 <input id="eq10_0" type="range" min="-12" max="12" value="0" step="1" aria-label="31 Hz" /></label>
 <label>62 <input id="eq10_1" type="range" min="-12" max="12" value="0" step="1" aria-label="62 Hz" /></label>
 <label>125<input id="eq10_2" type="range" min="-12" max="12" value="0" step="1" aria-label="125 Hz" /></label>
@@ -972,6 +982,20 @@ Retune detect: --
   </div>
 </div>
 </div>
+
+  <script>
+  // EQ window preset selector logic
+  document.addEventListener('DOMContentLoaded', function() {
+    var eqPreset = document.getElementById('eqwin-preset');
+    if (eqPreset) {
+      eqPreset.addEventListener('change', function(e) {
+        if (typeof applyPreset === 'function') {
+          applyPreset(e.target.value);
+        }
+      });
+    }
+  });
+  </script>
 
 <div id="winLog" class="floatWin" style="width:320px;" role="dialog" aria-modal="false" aria-labelledby="winLogTitle">
 <div class="winHeader">
