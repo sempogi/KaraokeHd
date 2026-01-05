@@ -10,9 +10,6 @@
   </a>
 </p>
 
-<h2 align="center">Live Preview</h2>
-<iframe src="https://sempogi.github.io/KaraokeHd/index.html" width="100%" height="600" style="border:1px solid #ccc;">
-</iframe>
 
 
 
