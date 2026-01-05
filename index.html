@@ -864,7 +864,6 @@ Retune detect: --
 <button class="btn" onclick="toggleWin('winEQ')" aria-label="EQ">🎛</button>
 <button class="btn" onclick="toggleWin('winPlaylist')" aria-label="Playlist">📜</button>
 <button class="btn" onclick="toggleWin('winLog')" aria-label="Log">🧾</button>
-<button class="btn" onclick="toggleWin('winLyrics')" aria-label="Lyrics">📖</button>
 <button class="btn" onclick="toggleWin('winKaro')" aria-label="Karaoke">🎤</button>
 <button class="btn" onclick="toggleWin('winKaroSettings')" aria-label="Karaoke Settings">⚙️🎤</button>
 
@@ -1007,48 +1006,8 @@ Retune detect: --
 </div>
 </div>
 
-<div id="winLyrics" class="floatWin" style="width:460px;" role="dialog" aria-modal="false" aria-labelledby="winLyricsTitle">
-<div class="winHeader">
-<strong id="winLyricsTitle">📖 Lyrics</strong>
-<span class="winBtns"><button class="btn" onclick="toggleWin('winLyrics')">✕</button></span>
-</div>
-<div class="winBody" style="font-size:11px">
-<div style="display:flex; gap:6px; flex-wrap:wrap; align-items:center; margin-bottom:8px">
-
-<label>Source
-  <select id="lySrc">
-    <!-- Default: Auto single-source -->
-    <option value="auto" selected>Auto (single-source)</option>
-
-    <!-- Single-type options -->
-    <option value="05">0x05 only (Lyric)</option>
-    <option value="01">0x01 only (Text)</option>
-    <option value="03">0x03 only (Track Name)</option>
-  </select>
-</label>
-
-<label><input type="checkbox" id="lyPreserve" checked> Preserve spaces</label>
-<label><input type="checkbox" id="lySplitSlash" checked> Split on “/”</label>
-<label>Encoding
-  <select id="lyEnc">
-    <option value="auto" selected>Auto (UTF‑8 → Latin‑1 → Raw)</option>
-    <option value="latin1">Latin‑1</option>
-    <option value="utf8">UTF‑8</option>
-  </select>
-</label>
-<button class="btn" id="btnLyFull">Full</button>
-<button class="btn" id="btnLyTokens">Tokens</button>
 </div>
 
-
-<div id="lyPrev" style="color:#9fbad1; margin:4px 0 2px"></div>
-<div id="lyCurr" style="font-weight:700; margin:2px 0 2px"></div>
-<div id="lyNext" style="color:#b6c9dc; margin:2px 0 6px"></div>
-
-<div id="lyFull" style="display:none;"></div>
-<div id="lyTokens" style="display:none;"></div>
-</div>
-</div>
 
 <div id="winKaro" class="floatWin" style="width:680px;" role="dialog" aria-modal="false" aria-labelledby="winKaroTitle">
 <div class="winHeader">
@@ -1071,21 +1030,86 @@ Retune detect: --
 </div>
 <div class="winBody" style="font-size:11px">
 <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin-bottom:8px">
-<label>Align <select id="karoAlign"><option value="left">Left</option><option value="center" selected>Center</option></select></label>
-<label><input type="checkbox" id="karoLettersOnly"> Letters‑only</label>
-<label><input type="checkbox" id="karoChromaSafe" checked> Chroma‑safe</label>
-<label><input type="checkbox" id="karoMicroStroke" checked> Micro‑stroke</label>
-<label>Fill <input type="color" id="karoFill" value="#00b3ff"></label>
-<label>Base <input type="color" id="karoBase" value="#ffffff"></label>
-<label>BG   <input type="color" id="karoBg" value="#000000"></label>
-<label>Glow <input type="range" id="karoGlow" min="0" max="24" step="1" value="10"></label>
-<label>Stroke <input type="range" id="karoStrokeW" min="0" max="6" step="0.5" value="1"></label>
-<label>Blend <select id="karoBlend"><option value="normal" selected>Normal</option><option value="screen">Screen</option><option value="overlay">Overlay</option><option value="lighten">Lighten</option><option value="multiply">Multiply</option></select></label>
-<label>Weight <input type="range" id="karoWeight" min="300" max="900" step="50" value="800"></label>
-<label>Letter‑spacing (em) <input type="range" id="karoLS" min="-0.02" max="0.20" step="0.01" value="0"></label>
-<label>Token gap (em) <input type="range" id="karoGap" min="0" max="0.30" step="0.01" value="0.04"></label>
-<label>Case <select id="karoCase"><option value="none" selected>As is</option><option value="upper">ALL CAPS</option><option value="lower">all small</option><option value="cap">Cap Each Word</option><option value="sentence">Sentence</option></select></label>
-</div>
+        <div style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px;">
+          <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+            <label>Align<br><select id="karoAlign"><option value="left">Left</option><option value="center" selected>Center</option></select></label>
+            <label>Letters‑only<br><input type="checkbox" id="karoLettersOnly"></label>
+            <label>Chroma‑safe<br><input type="checkbox" id="karoChromaSafe" checked></label>
+            <label>Micro‑stroke<br><input type="checkbox" id="karoMicroStroke" checked></label>
+          </div>
+          <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+            <label>Fill<br><input type="color" id="karoFill" value="#00b3ff"></label>
+            <label>Base<br><input type="color" id="karoBase" value="#ffffff"></label>
+            <label>BG<br><input type="color" id="karoBg" value="#000000"></label>
+            <label>Glow<br><input type="range" id="karoGlow" min="0" max="24" step="1" value="10"></label>
+          </div>
+          <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+            <label>Stroke<br><input type="range" id="karoStrokeW" min="0" max="6" step="0.5" value="1"></label>
+            <label>Blend<br><select id="karoBlend"><option value="normal" selected>Normal</option><option value="screen">Screen</option><option value="overlay">Overlay</option><option value="lighten">Lighten</option><option value="multiply">Multiply</option></select></label>
+            <label>Weight<br><input type="range" id="karoWeight" min="300" max="900" step="50" value="800"></label>
+            <label>Letter‑spacing (em)<br><input type="range" id="karoLS" min="-0.02" max="0.20" step="0.01" value="0"></label>
+            <label>Token gap (em)<br><input type="range" id="karoGap" min="0" max="0.30" step="0.01" value="0.04"></label>
+            <label>Case<br><select id="karoCase"><option value="none" selected>As is</option><option value="upper">ALL CAPS</option><option value="lower">all small</option><option value="cap">Cap Each Word</option><option value="sentence">Sentence</option></select></label>
+          </div>
+        </div>
+
+<!-- Lyrics controls and display (moved from winLyrics) -->
+<section id="lyrics-controls" style="max-width:520px; margin:24px auto 0 auto;" aria-label="Lyrics Controls">
+    <h2 style="font-size:1.1em; margin-bottom:8px;">📖 Lyrics</h2>
+    <div style="font-size:11px">
+      <div style="display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 8px;">
+        <label>Source<br>
+          <select id="lySrc">
+            <option value="auto" selected>Auto (single-source)</option>
+            <option value="05">0x05 only (Lyric)</option>
+            <option value="01">0x01 only (Text)</option>
+            <option value="03">0x03 only (Track Name)</option>
+          </select>
+        </label>
+        <label>Preserve spaces<br><input type="checkbox" id="lyPreserve" checked></label>
+        <label>Split on “/”<br><input type="checkbox" id="lySplitSlash" checked></label>
+        <label>Encoding<br>
+          <select id="lyEnc">
+            <option value="auto" selected>Auto (UTF‑8 → Latin‑1 → Raw)</option>
+            <option value="latin1">Latin‑1</option>
+            <option value="utf8">UTF‑8</option>
+          </select>
+        </label>
+        <button class="btn" id="btnLyFull">Full</button>
+        <button class="btn" id="btnLyTokens">Tokens</button>
+      </div>
+      <div id="lyPrev" style="color:#9fbad1; margin:4px 0 2px"></div>
+      <div id="lyCurr" style="font-weight:700; margin:2px 0 2px"></div>
+      <div id="lyNext" style="color:#b6c9dc; margin:2px 0 6px"></div>
+      <div id="lyFull" style="display:none;"></div>
+      <div id="lyTokens" style="display:none;"></div>
+    </div>
+  <h2 style="font-size:1.1em; margin-bottom:8px;">📖 Lyrics</h2>
+  <div style="font-size:11px">
+    <div style="display:flex; gap:6px; flex-wrap:wrap; align-items:center; margin-bottom:8px">
+      <label>Source
+        <select id="lySrc">
+          <option value="auto" selected>Auto (single-source)</option>
+          <option value="05">0x05 only (Lyric)</option>
+          <option value="01">0x01 only (Text)</option>
+          <option value="03">0x03 only (Track Name)</option>
+        </select>
+      </label>
+      <label><input type="checkbox" id="lyPreserve" checked> Preserve spaces</label>
+      <label><input type="checkbox" id="lySplitSlash" checked> Split on “/”</label>
+      <label>Encoding
+        <select id="lyEnc">
+          <option value="auto" selected>Auto (UTF‑8 → Latin‑1 → Raw)</option>
+          <option value="latin1">Latin‑1</option>
+          <option value="utf8">UTF‑8</option>
+        </select>
+      </label>
+      <button class="btn" id="btnLyFull">Full</button>
+      <button class="btn" id="btnLyTokens">Tokens</button>
+    </div>
+   
+  </div>
+</section>
 </div>
 
 
@@ -1110,6 +1134,11 @@ Retune detect: --
 <input id="ks-font-manual-name" class="ks-input" placeholder="Type a device font name… e.g., 'Calibri'" />
 <button id="ks-test-manual-font" class="ks-btn">Test & apply</button>
 </div>
+ <div id="lyPrev" style="color:#9fbad1; margin:4px 0 2px"></div>
+    <div id="lyCurr" style="font-weight:700; margin:2px 0 2px"></div>
+    <div id="lyNext" style="color:#b6c9dc; margin:2px 0 6px"></div>
+    <div id="lyFull" style="display:none;"></div>
+    <div id="lyTokens" style="display:none;"></div>
 </div>
 
 
