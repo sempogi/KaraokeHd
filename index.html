@@ -301,6 +301,8 @@ SOFTWARE.
     background:#2fe02f;
     box-shadow:0 0 10px #2fe02f, inset 0 0 4px rgba(0,0,0,0.6);
   }
+  .chTable td { padding:4px 6px; border-bottom:1px solid rgba(255,255,255,0.03); color:#cfe8ff }
+  .chTable th { padding:6px 6px; font-weight:600 }
   .ctlV {
     display: flex;
     flex-direction: column;
@@ -952,6 +954,22 @@ Retune detect: --
 </div>
 <div class="winBody">
 <div id="plList"></div>
+</div>
+</div>
+
+<div id="winChanInspect" class="floatWin" style="width:360px;right:8px;top:64px;" role="dialog" aria-modal="false" aria-labelledby="winChanInspectTitle">
+<div class="winHeader">
+<strong id="winChanInspectTitle">🎛 Channels</strong><span class="winBtns"><button class="btn" onclick="toggleWin('winChanInspect')">✕</button></span>
+</div>
+<div class="winBody">
+  <div style="overflow:auto;max-height:360px;">
+    <table id="chanTable" class="chTable" style="width:100%;font-size:11px;border-collapse:collapse">
+      <thead>
+        <tr style="text-align:left;color:#9fbfe8"><th style="width:28px">Ch</th><th>Inst</th><th style="width:48px">Prog</th><th style="width:56px">Gain</th><th style="width:56px">Pan</th></tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
 </div>
 </div>
 
@@ -6552,6 +6570,32 @@ function runSmokeTest() {
     try { if (typeof startPlayback === 'function') startPlayback(true); } catch(e) { try{ console.log('startPlayback error: '+e); }catch(_){} }
     setTimeout(()=>{ try{ if (typeof stopPlayback === 'function') stopPlayback(); } catch(_){}; try{ if (typeof log === 'function') log('Smoke test: finished'); else console.log('Smoke test: finished'); }catch(_){} }, 3000);
   }, 900);
+}
+</script>
+<script>
+// Channel inspector: populates #chanTable from `channels`
+function buildChannelInspector() {
+  try {
+    const tbody = document.querySelector('#chanTable tbody');
+    if (!tbody || !window.channels) return;
+    let out = '';
+    for (let i = 0; i < 16; i++) {
+      const st = channels[i] || {};
+      const inst = st.inst || '';
+      const prog = (st.prog != null) ? String(st.prog) : '';
+      const gain = (typeof st.baseGain === 'number') ? st.baseGain.toFixed(2) : '';
+      let panVal = '';
+      try { if (st.pan && typeof st.pan.pan === 'number') panVal = st.pan.pan.toFixed(2); } catch(_) {}
+      out += `<tr><td>${i}</td><td>${inst}</td><td>${prog}</td><td>${gain}</td><td>${panVal}</td></tr>`;
+    }
+    tbody.innerHTML = out;
+  } catch (e) { console.log('chanInspect err', e); }
+}
+
+// Start periodic update when page loads
+if (!window.__chanInspectInterval) {
+  buildChannelInspector();
+  window.__chanInspectInterval = setInterval(buildChannelInspector, 500);
 }
 </script>
 </body>
