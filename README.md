@@ -38,19 +38,18 @@
 
 ## 📸 Screenshots
 
-> Replace these placeholders with your actual screenshots (`screenshot.png` or `.jpg` in the root directory or `assets/` folder).
-
+>Actual Screenshots
 ### Main Interface
-![Main Interface](assets/main-interface.png)
+![Main Interface](main.jpg)
 
 ### Karaoke Display
-![Karaoke Display](assets/karaoke-display.png)
+![Karaoke Display](karaoke.jpg)
 
 ### Recorder Feature
-![Recorder](assets/recorder.png)
+![Recorder](recorder.jpg)
 
 ### Video Background Support
-![Video Background](assets/video-background.png)
+![Video Background](video.jpg)
 
 ---
 
