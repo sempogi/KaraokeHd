@@ -5,7 +5,11 @@
 ![License Badge](https://img.shields.io/badge/license-Custom-red)
 
 **KaraokeHD** is a **standalone, serverless HTML application** that runs directly in any modern browser. It provides a full karaoke experience with MIDI/KAR playback, real-time lyrics rendering, and optional video backgrounds—all powered by pure HTML and inline JavaScript.
-
+<p align="center">
+  https://sempogi.github.io/KaraokeHd/index.html
+    https://img.shields.io/badge/Open%20KaraokeHD-Click%20Here-brightgreen?style=for-the-badge
+  </a>
+</p>
 ---
 
 ## ✅ Features
