@@ -51,6 +51,14 @@
 ### Video Background Support
 ![Video Background](video.jpg)
 
+### more
+![..](karaoke2.jpg)
+
+### more
+![...](others.jpg)
+
+
+
 ---
 
 ## 📂 Folder Structure
