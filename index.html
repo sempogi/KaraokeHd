@@ -884,6 +884,7 @@ Retune detect: --
 <span class="chip" id="usedSummary">Used 0/16</span>
 <span class="chip" id="activeSummary">Now 0</span>
 <button id="btnResetUsed" class="btn">↺</button>
+<button id="btnSmokeTest" class="btn" title="Run smoke test">Test</button>
 </div>
   <div style="display:flex;gap:8px;align-items:center;margin-bottom:6px">
   <span id="compBypassIndicator" class="chip" title="Compressor bypass"><span id="compLed" class="cmp-led" aria-hidden="true"></span> CMP: OFF</span>
@@ -1458,6 +1459,8 @@ bar.style.height = h+'%'; bar._h = h;
 
     
 function bindUI() {
+      const btnSmoke = document.getElementById('btnSmokeTest');
+      if (btnSmoke) btnSmoke.addEventListener('click', ()=>{ try { runSmokeTest(); } catch(e){ try{ log('Smoke test failed: '+e); }catch(_){} } });
     document.getElementById('btnClearLog').addEventListener('click', () => {
   clearStatusLog();
   // Optional trace so you know it was cleared
@@ -1502,13 +1505,11 @@ const el = document.getElementById('eq10_'+i); if (el) el.addEventListener('inpu
         const ind = document.getElementById('compBypassIndicator'); const led = document.getElementById('compLed');
         if (settings.audio.compBypass) {
           notch.connect(clip);
-          if (ind) ind.textContent = 'CMP: BYP';
-          if (led) led.classList.remove('on');
+          if (ind) ind.innerHTML = `<span id="compLed" class="cmp-led" aria-hidden="true"></span> CMP: BYP`;
         } else {
           notch.connect(masterComp);
           masterComp.connect(clip);
-          if (ind) ind.textContent = 'CMP: ON';
-          if (led) led.classList.add('on');
+          if (ind) ind.innerHTML = `<span id="compLed" class="cmp-led on" aria-hidden="true"></span> CMP: ON`;
         }
       } catch(_) {}
     });
@@ -1540,8 +1541,7 @@ const el = document.getElementById('eq10_'+i); if (el) el.addEventListener('inpu
     const vAtt = document.getElementById('compAttackVal'); if (vAtt && sAtt) vAtt.textContent = `${(parseFloat(sAtt.value)*1000).toFixed(1)} ms`;
     const vRel = document.getElementById('compReleaseVal'); if (vRel && sRel) vRel.textContent = `${(parseFloat(sRel.value)*1000).toFixed(1)} ms`;
     const ind = document.getElementById('compBypassIndicator'); const led = document.getElementById('compLed');
-    if (ind) ind.textContent = settings.audio.compBypass? 'CMP: BYP' : 'CMP: ON';
-    if (led) { if (settings.audio.compBypass) led.classList.remove('on'); else led.classList.add('on'); }
+    if (ind) { ind.innerHTML = `<span id="compLed" class="cmp-led${settings.audio.compBypass ? '' : ' on'}" aria-hidden="true"></span> ${settings.audio.compBypass ? 'CMP: BYP' : 'CMP: ON'}`; }
   } catch(_) {}
 
   // Live update readouts on input
@@ -6534,6 +6534,25 @@ window.addEventListener('unload', () => {
     }
   } catch (_) {}
 });
+</script>
+<script>
+// Global smoke test helper
+function runSmokeTest() {
+  try { if (typeof log === 'function') log('Smoke test: starting'); else console.log('Smoke test: starting'); } catch(_) {}
+  try {
+    const pre = document.getElementById('precomputeNoise');
+    if (pre) { pre.checked = true; settings.audio.precomputeNoise = true; persistSettings(); }
+  } catch(_) {}
+  try { if (typeof initAudio === 'function') initAudio(); } catch(e) { try{ console.log('initAudio() error: '+e); }catch(_){} }
+  setTimeout(()=>{
+    try { console.log('Noise cache size: '+(__noiseCache? __noiseCache.size:0)); } catch(_) {}
+    try { const cb = document.getElementById('compBypass'); if (cb) { cb.checked = false; cb.dispatchEvent(new Event('change')); } } catch(_) {}
+    const sliderIds = ['compThresh','compRatio','compKnee','compAttack','compRelease'];
+    sliderIds.forEach((id)=>{ try { const s=document.getElementById(id); if(s){ const min=parseFloat(s.min||0), max=parseFloat(s.max||1); s.value=String((min+max)/2); s.dispatchEvent(new Event('input')); } } catch(_){} });
+    try { if (typeof startPlayback === 'function') startPlayback(true); } catch(e) { try{ console.log('startPlayback error: '+e); }catch(_){} }
+    setTimeout(()=>{ try{ if (typeof stopPlayback === 'function') stopPlayback(); } catch(_){}; try{ if (typeof log === 'function') log('Smoke test: finished'); else console.log('Smoke test: finished'); }catch(_){} }, 3000);
+  }, 900);
+}
 </script>
 </body>
 </html>
