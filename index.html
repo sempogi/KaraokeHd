@@ -1522,8 +1522,7 @@ bar.style.height = h+'%'; bar._h = h;
 
     
 function bindUI() {
-      const btnSmoke = document.getElementById('btnSmokeTest');
-      if (btnSmoke) btnSmoke.addEventListener('click', ()=>{ try { runSmokeTest(); } catch(e){ try{ log('Smoke test failed: '+e); }catch(_){} } });
+     
     document.getElementById('btnClearLog').addEventListener('click', () => {
   clearStatusLog();
   // Optional trace so you know it was cleared
@@ -6567,25 +6566,7 @@ window.addEventListener('unload', () => {
   } catch (_) {}
 });
 </script>
-<script>
-// Global smoke test helper
-function runSmokeTest() {
-  try { if (typeof log === 'function') log('Smoke test: starting'); else console.log('Smoke test: starting'); } catch(_) {}
-  try {
-    const pre = document.getElementById('precomputeNoise');
-    if (pre) { pre.checked = true; settings.audio.precomputeNoise = true; persistSettings(); }
-  } catch(_) {}
-  try { if (typeof initAudio === 'function') initAudio(); } catch(e) { try{ console.log('initAudio() error: '+e); }catch(_){} }
-  setTimeout(()=>{
-    try { console.log('Noise cache size: '+(__noiseCache? __noiseCache.size:0)); } catch(_) {}
-    try { const cb = document.getElementById('compBypass'); if (cb) { cb.checked = false; cb.dispatchEvent(new Event('change')); } } catch(_) {}
-    const sliderIds = ['compThresh','compRatio','compKnee','compAttack','compRelease'];
-    sliderIds.forEach((id)=>{ try { const s=document.getElementById(id); if(s){ const min=parseFloat(s.min||0), max=parseFloat(s.max||1); s.value=String((min+max)/2); s.dispatchEvent(new Event('input')); } } catch(_){} });
-    try { if (typeof startPlayback === 'function') startPlayback(true); } catch(e) { try{ console.log('startPlayback error: '+e); }catch(_){} }
-    setTimeout(()=>{ try{ if (typeof stopPlayback === 'function') stopPlayback(); } catch(_){}; try{ if (typeof log === 'function') log('Smoke test: finished'); else console.log('Smoke test: finished'); }catch(_){} }, 3000);
-  }, 900);
-}
-</script>
+
 <script>
 // Channel inspector: populates #chanTable from `channels`
 function buildChannelInspector() {
