@@ -597,7 +597,6 @@ SOFTWARE.
 }
 
 /* Header + lyrics above overlay/video */
-#winKaro .winHeader { position: relative; z-index: 3; }
 #winKaro #karoCurr,
 #winKaro #karoNext {
   position: relative;
@@ -606,9 +605,12 @@ SOFTWARE.
   text-shadow: 0 2px 6px rgba(0,0,0,0.75);
   padding: 10px 12px;
   line-height: 1.4;
+  background: transparent; /* Added this line */
 }
-#winKaro #karoNext { opacity: 0.8; }
 
+#winKaro #karoNext {
+  opacity: 0;
+}
 /* === Controls anchored to the whole window (avoid .winBody clipping) === */
 #winKaro .karoPL {
   position: absolute;
