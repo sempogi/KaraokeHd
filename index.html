@@ -6595,6 +6595,22 @@ if (!window.__chanInspectInterval) {
   window.__chanInspectInterval = setInterval(buildChannelInspector, 500);
 }
 </script>
+<script>
+(function startKaroOpacityBlink(){
+  const el = document.getElementById('karoNext');
+  if (!el) return;
+
+  if (el._blinkTimer) clearInterval(el._blinkTimer);
+
+  let on = true;
+  el.style.opacity = '1';
+
+  el._blinkTimer = setInterval(() => {
+    on = !on;
+    el.style.opacity = on ? '1' : '0';
+  }, 1500); // adjust speed as needed
+})();
+</script>
 </body>
 </html>
 
