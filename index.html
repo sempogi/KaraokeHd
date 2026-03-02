@@ -756,6 +756,19 @@ SOFTWARE.
   transform: none !important;
   z-index: 2147483647 !important;
 }
+
+/* Pseudo-fullscreen for individual Karaoke window (when native FS not available) */
+#winKaro.karo-pseudo-fs {
+  position: fixed !important;
+  left: 0 !important;
+  top: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  border-radius: 0 !important;
+  margin: 0 !important;
+  transform: none !important;
+  z-index: 2147483647 !important;
+}
 </style>
 
 </head>
@@ -1819,10 +1832,32 @@ KaroState.lettersOnly = !!e.target.checked; settings.karaoke.lettersOnly=!!e.tar
 (e)=>setCase(e.target.value)); setAlign(settings.karaoke.align); setChromaSafe(settings.karaoke.chromaSafe); setMicroStroke(settings.karaoke.microStroke); setFill(settings.karaoke.fill); setBase(settings.karaoke.base); setBg(settings.karaoke.bg); setGlow(settings.karaoke.glow); setStrokeW(settings.karaoke.strokeW); setBlend(settings.karaoke.blend); setWeight(settings.karaoke.weight); setLS(settings.karaoke.letterSpacing); setGap(settings.karaoke.tokenGap); setCase(settings.karaoke.case); $('karoLettersOnly').checked = settings.karaoke.lettersOnly; $('karoAlign').value = settings.karaoke.align; $('karoChromaSafe').checked = settings.karaoke.chromaSafe; $('karoMicroStroke').checked = settings.karaoke.microStroke; $('karoFill').value = settings.karaoke.fill; $('karoBase').value = settings.karaoke.base; $('karoBg').value = settings.karaoke.bg; $('karoGlow').value = settings.karaoke.glow; $('karoStrokeW').value = settings.karaoke.strokeW; $('karoBlend').value = settings.karaoke.blend; $('karoWeight').value = settings.karaoke.weight; $('karoLS').value = settings.karaoke.letterSpacing; $('karoGap').value = settings.karaoke.tokenGap; $('karoCase').value = settings.karaoke.case; ;
 })(); (function() {
 const fsBtn = document.getElementById('btnKaroFS'); const win = document.getElementById('winKaro'); function toggleFS() {
-if (!document.fullscreenElement) {
+try {
+if (!document.fullscreenElement && !win.classList.contains('karo-pseudo-fs')) {
+// Try native fullscreen on the window
+try {
 win.requestFullscreen?.();
+return;
+} catch(err) {
+// Fallback: apply pseudo-fullscreen via CSS class
+try {
+win.classList.add('karo-pseudo-fs');
+try { log('Karaoke: Using pseudo-fullscreen mode.'); } catch(_) {}
+return;
+} catch(fallbackErr) {}
+}
 } else {
-document.exitFullscreen?.();
+// Exit fullscreen
+try {
+if (document.fullscreenElement) document.exitFullscreen?.();
+} catch(_) {}
+// Remove pseudo-fullscreen class
+try {
+win.classList.remove('karo-pseudo-fs');
+} catch(_) {}
+}
+} catch(err) {
+try { log('Fullscreen toggle error: ' + (err?.message || err)); } catch(_) {}
 }
 } fsBtn.addEventListener('click', toggleFS); document.addEventListener('fullscreenchange', ()=> {
 const active = !!document.fullscreenElement; fsBtn.textContent = active? '⤢': '⛶'; fsBtn.setAttribute('aria-pressed', active? 'true': 'false');
@@ -5061,44 +5096,57 @@ function isFS(){ return !!document.fullscreenElement || document.documentElement
 
 async function enterFS(){
   // Try native Fullscreen API first
+  let nativeSuccess = false;
   try {
     await docEl.requestFullscreen();
+    nativeSuccess = true;
     return;
   } catch(err) {
-    // Try vendor-prefixed fallback
-    const anyEl = docEl;
-    if (anyEl && anyEl.webkitRequestFullscreen) {
-      try { anyEl.webkitRequestFullscreen(); return; } catch(_) {}
-    }
-    // Native FS not available (common in some WebViews). Apply pseudo-fullscreen.
+    // Try vendor-prefixed fallback (webkit)
     try {
-      document.documentElement.classList.add('pseudo-fullscreen');
-      try { log('Entered pseudo-fullscreen (native API unavailable).'); } catch(_) {}
-      return;
-    } catch(e) {
-      try { log('Fullscreen request failed: '+(err?.message||err)); } catch(_) {}
-    }
+      if (docEl && docEl.webkitRequestFullscreen) {
+        docEl.webkitRequestFullscreen();
+        nativeSuccess = true;
+        return;
+      }
+    } catch(webkitErr) {}
+  }
+  
+  // If native fullscreen failed or is denied, fall back to pseudo-fullscreen
+  try {
+    document.documentElement.classList.add('pseudo-fullscreen');
+    try { log('Fullscreen: Using pseudo-fullscreen mode (native unavailable or blocked).'); } catch(_) {}
+  } catch(fallbackErr) {
+    try { log('Fullscreen fallback error: ' + (fallbackErr?.message || fallbackErr)); } catch(_) {}
   }
 }
 
 async function exitFS(){
   // Try native exit first
   try {
-    if (document.fullscreenElement) { await document.exitFullscreen(); return; }
-  } catch(err) {
-    const anyDoc = document;
-    if (anyDoc && anyDoc.webkitExitFullscreen) {
-      try { anyDoc.webkitExitFullscreen(); return; } catch(_) {}
+    if (document.fullscreenElement) {
+      await document.exitFullscreen();
+      return;
     }
-    try { log('Exit fullscreen failed: '+(err?.message||err)); } catch(_) {}
+  } catch(err) {
+    // Try vendor-prefixed
+    try {
+      if (document.webkitFullscreenElement && document.webkitExitFullscreen) {
+        document.webkitExitFullscreen();
+        return;
+      }
+    } catch(webkitErr) {}
   }
-  // Remove pseudo fullscreen class if present
+  
+  // Remove pseudo fullscreen class
   try {
     if (document.documentElement.classList.contains('pseudo-fullscreen')) {
       document.documentElement.classList.remove('pseudo-fullscreen');
       try { log('Exited pseudo-fullscreen.'); } catch(_) {}
     }
-  } catch(_) {}
+  } catch(fallbackErr) {
+    try { log('Fullscreen exit error: ' + (fallbackErr?.message || fallbackErr)); } catch(_) {}
+  }
 }
 async function toggleFS(){ if(isFS()) await exitFS(); else await enterFS(); syncUI(); }
 function syncUI(){ const active=isFS(); btn.textContent=active? '⤢' : '⛶'; btn.setAttribute('aria-pressed', active? 'true':'false'); btn.title=active? 'Exit full screen' : 'Full screen'; }
