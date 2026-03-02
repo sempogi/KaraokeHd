@@ -1831,25 +1831,41 @@ KaroState.lettersOnly = !!e.target.checked; settings.karaoke.lettersOnly=!!e.tar
 (e)=>setGap(parseFloat(e.target.value || '0'))); $('karoCase').addEventListener('change',
 (e)=>setCase(e.target.value)); setAlign(settings.karaoke.align); setChromaSafe(settings.karaoke.chromaSafe); setMicroStroke(settings.karaoke.microStroke); setFill(settings.karaoke.fill); setBase(settings.karaoke.base); setBg(settings.karaoke.bg); setGlow(settings.karaoke.glow); setStrokeW(settings.karaoke.strokeW); setBlend(settings.karaoke.blend); setWeight(settings.karaoke.weight); setLS(settings.karaoke.letterSpacing); setGap(settings.karaoke.tokenGap); setCase(settings.karaoke.case); $('karoLettersOnly').checked = settings.karaoke.lettersOnly; $('karoAlign').value = settings.karaoke.align; $('karoChromaSafe').checked = settings.karaoke.chromaSafe; $('karoMicroStroke').checked = settings.karaoke.microStroke; $('karoFill').value = settings.karaoke.fill; $('karoBase').value = settings.karaoke.base; $('karoBg').value = settings.karaoke.bg; $('karoGlow').value = settings.karaoke.glow; $('karoStrokeW').value = settings.karaoke.strokeW; $('karoBlend').value = settings.karaoke.blend; $('karoWeight').value = settings.karaoke.weight; $('karoLS').value = settings.karaoke.letterSpacing; $('karoGap').value = settings.karaoke.tokenGap; $('karoCase').value = settings.karaoke.case; ;
 })(); (function() {
-const fsBtn = document.getElementById('btnKaroFS'); const win = document.getElementById('winKaro'); function toggleFS() {
+const fsBtn = document.getElementById('btnKaroFS'); const win = document.getElementById('winKaro'); async function toggleFS() {
 try {
 if (!document.fullscreenElement && !win.classList.contains('karo-pseudo-fs')) {
 // Try native fullscreen on the window
 try {
-win.requestFullscreen?.();
+if (win && typeof win.requestFullscreen === 'function') {
+await win.requestFullscreen();
 return;
+}
 } catch(err) {
+// Native fullscreen rejected or unavailable
+}
+// Try webkit variant
+try {
+if (win && typeof win.webkitRequestFullscreen === 'function') {
+await win.webkitRequestFullscreen?.();
+return;
+}
+} catch(err) {
+// Webkit fullscreen also rejected or unavailable
+}
 // Fallback: apply pseudo-fullscreen via CSS class
 try {
 win.classList.add('karo-pseudo-fs');
-try { log('Karaoke: Using pseudo-fullscreen mode.'); } catch(_) {}
+try { log('Karaoke: Using pseudo-fullscreen mode (native API unavailable).'); } catch(_) {}
 return;
-} catch(fallbackErr) {}
+} catch(fallbackErr) {
+try { log('Pseudo-fullscreen error: ' + (fallbackErr?.message || fallbackErr)); } catch(_) {}
 }
 } else {
 // Exit fullscreen
 try {
-if (document.fullscreenElement) document.exitFullscreen?.();
+if (document.fullscreenElement) {
+await document.exitFullscreen();
+}
 } catch(_) {}
 // Remove pseudo-fullscreen class
 try {
@@ -1859,7 +1875,7 @@ win.classList.remove('karo-pseudo-fs');
 } catch(err) {
 try { log('Fullscreen toggle error: ' + (err?.message || err)); } catch(_) {}
 }
-} fsBtn.addEventListener('click', toggleFS); document.addEventListener('fullscreenchange', ()=> {
+} fsBtn.addEventListener('click', ()=>toggleFS().catch(e=>{ try { log('Fullscreen click error: '+(e?.message||e)); } catch(_) {} })); document.addEventListener('fullscreenchange', ()=> {
 const active = !!document.fullscreenElement; fsBtn.textContent = active? '⤢': '⛶'; fsBtn.setAttribute('aria-pressed', active? 'true': 'false');
 });
 })(); document.getElementById('density').value = settings.ui.density; applyDensity(settings.ui.density); fit16Active = settings.ui.fit16; document.getElementById('fit16').checked = settings.ui.fit16; if (fit16Active) autoFit16(); document.getElementById('palette').value = settings.ui.palette; palette = settings.ui.palette; document.getElementById('preset').value = settings.ui.preset; applyPreset(settings.ui.preset); document.getElementById('limStr').value = settings.audio.limiter; onLimiter(); document.getElementById('notch').value = settings.audio.notch; onNotch(); document.getElementById('contMode').value = settings.ui.contMode; contMode = settings.ui.contMode; document.getElementById('autoAssign').value = settings.ui.autoAssign? '1': '0'; autoAssign = settings.ui.autoAssign; document.getElementById('autoRecovery').value = settings.ui.autoRecovery? '1': '0'; autoRecovery = settings.ui.autoRecovery; document.getElementById('solfEnable').checked = settings.audio.solfEnable; solfEnable = settings.audio.solfEnable; document.getElementById('solfType').value = settings.audio.solfType; solfType = settings.audio.solfType; document.getElementById('solfFreq').value = String(settings.audio.solfFreq); solfFreq = settings.audio.solfFreq; document.getElementById('solfLevel').value = String(settings.audio.solfLevel); document.getElementById('tuneEnable').checked = settings.audio.tuneEnable; tuneEnable = settings.audio.tuneEnable; document.getElementById('tuneFreq').value = String(settings.audio.tuneFreq); tuneFreq = settings.audio.tuneFreq; applySavedWindows(); buildMixerOnce();
