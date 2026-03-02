@@ -771,7 +771,10 @@ Ultra‑Compact Mixer • Visualizer • Recording • Retune • Lyrics • Kar
 <div id="top">
 
 <span style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
-  <input id="midFiles" type="file" multiple accept=".mid,.kar" />
+    
+ <input id="midFiles" type="file" multiple
+       accept="*/*,.mid,.midi,.kar,audio/*,application/octet-stream" />
+       
   <button id="btnInit" class="btn primary">Init</button>
   <button id="btnPlay" class="btn" disabled aria-label="Play">▶</button>
   <button id="btnStop" class="btn" disabled aria-label="Stop">⏹</button>
@@ -6610,6 +6613,34 @@ if (!window.__chanInspectInterval) {
     el.style.opacity = on ? '1' : '0';
   }, 1500); // adjust speed as needed
 })();
+</script>
+
+<script>
+document.getElementById('midFiles').addEventListener('change', async (e) => {
+  const files = Array.from(e.target.files || []);
+
+  console.log("Returned file count:", files.length);
+
+  if (!files.length) return;
+
+  const valid = files.filter(f => {
+    const name = (f.name || "").toLowerCase();
+    return name.endsWith(".mid") || name.endsWith(".midi") || name.endsWith(".kar");
+  });
+
+  if (!valid.length) {
+    alert("Please select .mid / .midi / .kar files only.");
+    e.target.value = "";
+    return;
+  }
+
+  // Example: read first MIDI/KAR file
+  const f = valid[0];
+  console.log("Selected:", f.name, "type:", f.type, "size:", f.size);
+
+  const buf = await f.arrayBuffer();
+  console.log("Loaded bytes:", buf.byteLength);
+});
 </script>
 </body>
 </html>
