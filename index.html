@@ -1057,39 +1057,10 @@ Ultra‑Compact Mixer • Visualizer • Recording • Retune • Lyrics • Kar
 
 <!-- Lyrics controls and display (moved from winLyrics) -->
 <section id="lyrics-controls" style="max-width:520px; margin:24px auto 0 auto;" aria-label="Lyrics Controls">
-    <h2 style="font-size:1.1em; margin-bottom:8px;">📖 Lyrics</h2>
-    <div style="font-size:11px">
-      <div style="display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 8px;">
-        <label>Source<br>
-          <select id="lySrc">
-            <option value="auto" selected>Auto (single-source)</option>
-            <option value="05">0x05 only (Lyric)</option>
-            <option value="01">0x01 only (Text)</option>
-            <option value="03">0x03 only (Track Name)</option>
-          </select>
-        </label>
-        <label>Preserve spaces<br><input type="checkbox" id="lyPreserve" checked></label>
-        <label>Split on “/”<br><input type="checkbox" id="lySplitSlash" checked></label>
-        <label>Encoding<br>
-          <select id="lyEnc">
-            <option value="auto" selected>Auto (UTF‑8 → Latin‑1 → Raw)</option>
-            <option value="latin1">Latin‑1</option>
-            <option value="utf8">UTF‑8</option>
-          </select>
-        </label>
-        <button class="btn" id="btnLyFull">Full</button>
-        <button class="btn" id="btnLyTokens">Tokens</button>
-      </div>
-      <div id="lyPrev" style="color:#9fbad1; margin:4px 0 2px"></div>
-      <div id="lyCurr" style="font-weight:700; margin:2px 0 2px"></div>
-      <div id="lyNext" style="color:#b6c9dc; margin:2px 0 6px"></div>
-      <div id="lyFull" style="display:none;"></div>
-      <div id="lyTokens" style="display:none;"></div>
-    </div>
   <h2 style="font-size:1.1em; margin-bottom:8px;">📖 Lyrics</h2>
   <div style="font-size:11px">
-    <div style="display:flex; gap:6px; flex-wrap:wrap; align-items:center; margin-bottom:8px">
-      <label>Source
+    <div style="display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 8px;">
+      <label>Source<br>
         <select id="lySrc">
           <option value="auto" selected>Auto (single-source)</option>
           <option value="05">0x05 only (Lyric)</option>
@@ -1097,9 +1068,9 @@ Ultra‑Compact Mixer • Visualizer • Recording • Retune • Lyrics • Kar
           <option value="03">0x03 only (Track Name)</option>
         </select>
       </label>
-      <label><input type="checkbox" id="lyPreserve" checked> Preserve spaces</label>
-      <label><input type="checkbox" id="lySplitSlash" checked> Split on “/”</label>
-      <label>Encoding
+      <label>Preserve spaces<br><input type="checkbox" id="lyPreserve" checked></label>
+      <label>Split on “/”<br><input type="checkbox" id="lySplitSlash" checked></label>
+      <label>Encoding<br>
         <select id="lyEnc">
           <option value="auto" selected>Auto (UTF‑8 → Latin‑1 → Raw)</option>
           <option value="latin1">Latin‑1</option>
@@ -1109,11 +1080,13 @@ Ultra‑Compact Mixer • Visualizer • Recording • Retune • Lyrics • Kar
       <button class="btn" id="btnLyFull">Full</button>
       <button class="btn" id="btnLyTokens">Tokens</button>
     </div>
-   
+    <div id="lyPrev" style="color:#9fbad1; margin:4px 0 2px"></div>
+    <div id="lyCurr" style="font-weight:700; margin:2px 0 2px"></div>
+    <div id="lyNext" style="color:#b6c9dc; margin:2px 0 6px"></div>
+    <div id="lyFull" style="display:none;"></div>
+    <div id="lyTokens" style="display:none;"></div>
   </div>
 </section>
-</div>
-
 
 <!-- ⚙️ Karaoke Settings › Font -->
 
@@ -1136,13 +1109,6 @@ Ultra‑Compact Mixer • Visualizer • Recording • Retune • Lyrics • Kar
 <input id="ks-font-manual-name" class="ks-input" placeholder="Type a device font name… e.g., 'Calibri'" />
 <button id="ks-test-manual-font" class="ks-btn">Test & apply</button>
 </div>
- <div id="lyPrev" style="color:#9fbad1; margin:4px 0 2px"></div>
-    <div id="lyCurr" style="font-weight:700; margin:2px 0 2px"></div>
-    <div id="lyNext" style="color:#b6c9dc; margin:2px 0 6px"></div>
-    <div id="lyFull" style="display:none;"></div>
-    <div id="lyTokens" style="display:none;"></div>
-</div>
-
 <script>
 const MUTE_FACTOR = 0.0; const STORAGE_KEY = 'MIDI_POC_Ultra_v5.4b.1';
 const log = (msg)=> {
