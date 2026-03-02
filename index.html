@@ -736,6 +736,28 @@ SOFTWARE.
 }
 </style>
 
+<style>
+/* Pseudo-fullscreen fallback for WebViews that block Fullscreen API
+   When the native Fullscreen API is unavailable (common in simple APK wrappers),
+   we expand the karaoke window to cover the viewport and hide page chrome. */
+:root.pseudo-fullscreen
+:root.pseudo-fullscreen body { height: 100vh !important; overflow: hidden !important; }
+:root.pseudo-fullscreen #vizWrap,
+:root.pseudo-fullscreen header,
+:root.pseudo-fullscreen #top { display: none !important; }
+:root.pseudo-fullscreen #winKaro {
+  position: fixed !important;
+  left: 0 !important;
+  top: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  border-radius: 0 !important;
+  margin: 0 !important;
+  transform: none !important;
+  z-index: 2147483647 !important;
+}
+</style>
+
 </head>
 <body class="density-ultra">
 
@@ -5035,15 +5057,48 @@ const btn=document.getElementById('btnPageFS');
 if(!btn) return;
 const docEl=document.documentElement;
 
-function isFS(){ return !!document.fullscreenElement; }
+function isFS(){ return !!document.fullscreenElement || document.documentElement.classList.contains('pseudo-fullscreen'); }
 
 async function enterFS(){
-try { await docEl.requestFullscreen(); }
-catch(err){ const anyEl=docEl; if(anyEl && anyEl.webkitRequestFullscreen){ anyEl.webkitRequestFullscreen(); } else { try{ log('Fullscreen request failed: '+(err?.message||err)); }catch(_){} } }
+  // Try native Fullscreen API first
+  try {
+    await docEl.requestFullscreen();
+    return;
+  } catch(err) {
+    // Try vendor-prefixed fallback
+    const anyEl = docEl;
+    if (anyEl && anyEl.webkitRequestFullscreen) {
+      try { anyEl.webkitRequestFullscreen(); return; } catch(_) {}
+    }
+    // Native FS not available (common in some WebViews). Apply pseudo-fullscreen.
+    try {
+      document.documentElement.classList.add('pseudo-fullscreen');
+      try { log('Entered pseudo-fullscreen (native API unavailable).'); } catch(_) {}
+      return;
+    } catch(e) {
+      try { log('Fullscreen request failed: '+(err?.message||err)); } catch(_) {}
+    }
+  }
 }
+
 async function exitFS(){
-try { await document.exitFullscreen(); }
-catch(err){ const anyDoc=document; if(anyDoc && anyDoc.webkitExitFullscreen){ anyDoc.webkitExitFullscreen(); } else { try{ log('Exit fullscreen failed: '+(err?.message||err)); }catch(_){} } }
+  // Try native exit first
+  try {
+    if (document.fullscreenElement) { await document.exitFullscreen(); return; }
+  } catch(err) {
+    const anyDoc = document;
+    if (anyDoc && anyDoc.webkitExitFullscreen) {
+      try { anyDoc.webkitExitFullscreen(); return; } catch(_) {}
+    }
+    try { log('Exit fullscreen failed: '+(err?.message||err)); } catch(_) {}
+  }
+  // Remove pseudo fullscreen class if present
+  try {
+    if (document.documentElement.classList.contains('pseudo-fullscreen')) {
+      document.documentElement.classList.remove('pseudo-fullscreen');
+      try { log('Exited pseudo-fullscreen.'); } catch(_) {}
+    }
+  } catch(_) {}
 }
 async function toggleFS(){ if(isFS()) await exitFS(); else await enterFS(); syncUI(); }
 function syncUI(){ const active=isFS(); btn.textContent=active? '⤢' : '⛶'; btn.setAttribute('aria-pressed', active? 'true':'false'); btn.title=active? 'Exit full screen' : 'Full screen'; }
