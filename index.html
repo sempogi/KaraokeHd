@@ -436,6 +436,23 @@ SOFTWARE.
   /* Alignment toggles */
   #winKaro.karo-align-left #karoLines .karoLine { text-align: left; }
   #winKaro.karo-align-center #karoLines .karoLine { text-align: center; }
+    /* Split mode: place the two slots on two rows; top is left-aligned, bottom is right-aligned.
+      Reserve vertical space and fix per-line min-height to avoid small layout jumps during swaps. */
+    #winKaro.karo-align-split #karoLines { display:flex; flex-direction:column; gap:6px; align-items:stretch; min-height: calc(2.4em); }
+    #winKaro.karo-align-split #karoLineTop { align-self:flex-start; text-align:left; white-space:nowrap; max-width:100%; line-height:1.15; min-height:1.2em; }
+    #winKaro.karo-align-split #karoLineBottom { align-self:flex-end; text-align:right; white-space:nowrap; max-width:100%; line-height:1.15; min-height:1.2em; }
+
+    /* Prevent small layout shifts in split mode by keeping box metrics identical
+       between current/upcoming states and disabling transitions that affect layout. */
+    #winKaro.karo-align-split #karoLines .karoLine,
+    #winKaro.karo-align-split #karoLines .karoLine.active,
+    #winKaro.karo-align-split #karoLines .karoLine.upcoming {
+      margin: 0 !important;
+      padding: 10px 12px !important;
+      font-weight: var(--kara-weight) !important;
+      line-height: 1.15 !important;
+      transition: none !important;
+    }
 
   /* Token/character structure */
   .karoToken { display: inline-block; margin: 0 var(--kara-token-gap); }
@@ -1153,7 +1170,7 @@ Ultra‑Compact Mixer • Visualizer • Recording • Retune • Lyrics • Kar
 <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin-bottom:8px">
         <div style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px;">
           <div style="display: flex; gap: 12px; flex-wrap: wrap;">
-            <label>Align<br><select id="karoAlign"><option value="left">Left</option><option value="center" selected>Center</option></select></label>
+            <label>Align<br><select id="karoAlign"><option value="left">Left</option><option value="center" selected>Center</option><option value="split">Split</option></select></label>
             <label>Letters‑only<br><input type="checkbox" id="karoLettersOnly"></label>
             <label>Chroma‑safe<br><input type="checkbox" id="karoChromaSafe" checked></label>
             <label>Micro‑stroke<br><input type="checkbox" id="karoMicroStroke" checked></label>
@@ -1859,9 +1876,10 @@ settings.ui.autoRecovery = (e.target.value === '1'); persistSettings(); autoReco
 })();
 (function() {
 const win = document.getElementById('winKaro'); function setAlign(v) {
-win.classList.toggle('karo-align-left',
-v === 'left'); win.classList.toggle('karo-align-center',
-v === 'center'); KaroState.align = v; settings.karaoke.align = v; persistSettings();
+  win.classList.toggle('karo-align-left', v === 'left');
+  win.classList.toggle('karo-align-center', v === 'center');
+  win.classList.toggle('karo-align-split', v === 'split');
+  KaroState.align = v; settings.karaoke.align = v; persistSettings();
 } function setFill(v) {
 win.style.setProperty('--kara-fill',
 v || '#00b3ff'); settings.karaoke.fill = v; persistSettings();
