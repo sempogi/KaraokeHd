@@ -40,6 +40,7 @@ SOFTWARE.
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; media-src 'self' blob:; connect-src 'self' blob:; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline';">
 <title>KaraokeHD</title>
 
+
 <style>
 /* =========================
    LAYERS ORDER
@@ -386,6 +387,9 @@ SOFTWARE.
   }
 
   #winKaro {
+  --kara-progress-stroke: #00bfff; /* default */
+
+
     --kara-fill: #f31260;  /* pink */
   --kara-base: #ffffff;  /* white */
   --kara-bg:   #00ff00;  /* green */
@@ -427,9 +431,9 @@ SOFTWARE.
     color: var(--kara-base);
     text-shadow: none;
     filter: none;
-    -webkit-text-stroke: 1px rgba(0,0,0,0.55);
+    -webkit-text-stroke: 1px rgba(0,0,0,1);
     /* text-stroke (non-standard) kept for environments that support it */
-    text-stroke: 0.5px rgba(0,0,0,0.55);
+    text-stroke: 0.5px rgba(0,0,0,1);
     mix-blend-mode: normal;
   }
 
@@ -441,6 +445,16 @@ SOFTWARE.
     #winKaro.karo-align-split #karoLines { display:flex; flex-direction:column; gap:6px; align-items:stretch; min-height: calc(2.4em); }
     #winKaro.karo-align-split #karoLineTop { align-self:flex-start; text-align:left; white-space:nowrap; max-width:100%; line-height:1.15; min-height:1.2em; }
     #winKaro.karo-align-split #karoLineBottom { align-self:flex-end; text-align:right; white-space:nowrap; max-width:100%; line-height:1.15; min-height:1.2em; }
+/* Normalize vertical spacing for center/left mode */
+/* Keep block layout but fix spacing */
+#winKaro:not(.karo-align-split) #karoLines .karoLine {
+  margin: 6px 0 0;  /* reduced from 12px */
+}
+
+/* Remove extra push on first line */
+#winKaro:not(.karo-align-split) #karoLines .karoLine:first-child {
+  margin-top: 0;
+}
 
     /* Prevent small layout shifts in split mode by keeping box metrics identical
        between current/upcoming states and disabling transitions that affect layout. */
@@ -462,18 +476,34 @@ SOFTWARE.
     letter-spacing: var(--kara-letter-spacing);
   }
   .karoLetter.base {
-    position: relative;
-    color: var(--kara-base);
-    text-shadow: 1px 2px 6px rgba(10,30,55,0.60);
-  }
-  .karoLetter.hi {
-    position: absolute;
-    left: 0; top: 0;
-    color: var(--kara-fill);
-    text-shadow: 0 0 var(--glow-radius) var(--kara-fill), 0 0 var(--glow-radius2) var(--kara-fill);
-    clip-path: inset(0 calc(100% - var(--kara-progress, 0%)) 0 0);
-    mix-blend-mode: var(--kara-blend);
-  }
+  position: relative;
+  color: var(--kara-base);
+
+  /* stronger separation */
+  text-shadow:
+    1px 2px 4px rgba(0,0,0,1),
+    0 0 2px rgba(0,0,0,1);
+
+  /* very subtle stroke for edge clarity */
+  -webkit-text-stroke: 1px #000;
+}
+.karoLetter.hi {
+  position: absolute;
+  left: 0;
+  top: 0;
+
+  color: var(--kara-fill);
+
+  /* ✅ NOW dynamic */
+  -webkit-text-stroke: 1.5px var(--kara-progress-stroke);
+
+  text-shadow:
+    0 0 var(--glow-radius) var(--kara-fill),
+    0 0 var(--glow-radius2) var(--kara-fill);
+
+  clip-path: inset(0 calc(100% - var(--kara-progress, 0%)) 0 0);
+  mix-blend-mode: var(--kara-blend);
+}
 
   /* Micro stroke mode */
   #winKaro.karo-micro-stroke .karoLetter.base,
@@ -514,13 +544,13 @@ SOFTWARE.
     filter: none !important;
     -webkit-filter: none !important;
     mix-blend-mode: normal !important;
-    -webkit-text-stroke: 1px rgba(0,0,0,0.55);
-    text-stroke: 1px rgba(0,0,0,0.55);
+    -webkit-text-stroke: 1px rgba(0,0,0,1);
+    text-stroke: 1px rgba(0,0,0,1);
   }
   #karoStartBarsDynamic .karoStartSegDynamic {
     background: #ffd84a !important;
     box-shadow: none !important;
-    outline: 1px solid rgba(0,0,0,0.55) !important;
+    outline: 1px solid rgba(0,0,0,1) !important;
     outline-offset: 0;
   }
 
@@ -559,8 +589,8 @@ SOFTWARE.
 
 /* Push lyrics down from header */
 #winKaro #karoLines {
-  padding-top: min(9vh, 90px);
-  padding-bottom: min(14vh, 140px);
+  padding-top: min(22vh, 90px);
+  padding-bottom: min(10vh, 140px);
 }
 
 
@@ -625,23 +655,33 @@ SOFTWARE.
 /* === Full-window background video (anchors to #winKaro) === */
 #winKaro .karoBgVideo {
   position: absolute;
-  top: 0; left: 0;
-  width: 100%; height: 100%;
-  object-fit: cover;           /* fills w/o distortion; crops instead of bands */
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+
+  object-fit: cover;
   z-index: 0;
-  pointer-events: none;        /* never blocks clicks */
-  opacity: 1;
-  transition: opacity 250ms ease;
+  pointer-events: none;
+
+  opacity: 0;
+  transition: opacity 1000ms ease;
+
+  will-change: opacity;
+  backface-visibility: hidden;
+  filter: brightness(0.9);
 }
 
-/* Contrast overlay above video (covers whole window) */
 #winKaro .karoOverlay {
   position: absolute;
-  top: 0; left: 0; width: 100%; height: 100%;
-  background: rgba(0,0,0,var(--karo-bg-dim,0.25));
-  transition: background 160ms ease;
-  z-index: 1;
+  top: 0; left: 0;
+  width: 100%;
+  height: 100%;
+
+  z-index: 2;
   pointer-events: none;
+
+  background: rgba(0,0,0,var(--karo-bg-dim,0.25));
 }
 
 /* Header + lyrics above overlay/video */
@@ -816,6 +856,7 @@ SOFTWARE.
   z-index: 2 !important;
   position: relative; /* ensure stacking context */
 }
+
 </style>
 
 <style>
@@ -879,7 +920,7 @@ font-weight:900;
 font-size:40px;
 text-shadow: 0 0 12px rgba(243,18,96,0.8), 0 0 24px rgba(243,18,96,0.6);
 ">
-KaraokeHD
+Solfeggio
 </strong>
 <span style="color:#9fbad1; font-size:20px;"> — </span>
 <strong style="color:#39FF14; font-weight:900;">codex45</strong>
@@ -1144,7 +1185,7 @@ Ultra‑Compact Mixer • Visualizer • Recording • Retune • Lyrics • Kar
 
 <div id="winKaro" class="floatWin" style="width:680px;" role="dialog" aria-modal="false" aria-labelledby="winKaroTitle">
 <div class="winHeader">
-<strong id="winKaroTitle">karaokeHD</strong>
+<strong id="winKaroTitle">Solfeggio</strong>
 <button class="btn karoSimpleBtn" title="Settings">⚙️</button>
 <button class="btn karoPlaylistBtn" title="Playlist">📜</button>
 <span class="winBtns">
@@ -1180,6 +1221,9 @@ Ultra‑Compact Mixer • Visualizer • Recording • Retune • Lyrics • Kar
             <label>Base<br><input type="color" id="karoBase" value="#ffffff"></label>
             <label>BG<br><input type="color" id="karoBg" value="#000000"></label>
             <label>Glow<br><input type="range" id="karoGlow" min="0" max="24" step="1" value="10"></label>
+            <label>Stroke Color:</label>
+<input type="color" id="strokePicker" value="#00bfff">
+
           </div>
           <div style="display: flex; gap: 12px; flex-wrap: wrap;">
             <label>Stroke<br><input type="range" id="karoStrokeW" min="0" max="6" step="0.5" value="1"></label>
@@ -5244,7 +5288,7 @@ if (nowRel >= (lastLine?.end ?? Infinity)) {
   topSlot.className = 'karoLine';
   bottomSlot.className = 'karoLine';
   topSlot.textContent = 'Thank you!';
-  bottomSlot.textContent = 'karaokeHD™/Codex45/noobduo/semsabiduria';
+  bottomSlot.textContent = 'karaokeHD™/Codex45/noobduo/Solfeggio';
   return;
 }
 
@@ -6357,37 +6401,44 @@ function rebuildLyricSourceOptions(metaEvs) {
   miniPanel.addEventListener('touchmove', resetAutoHide, { passive: true });
 
   /* ========= Video background & overlay (APPENDED TO WINDOW) ========= */
-  let video = null, overlay = null;
+ let videoA = null;
+let videoB = null;
+let activeVideo = null;
+let overlay = null;   // ✅ ADD THIS
+let video = null;     // ✅ you are using this touchmove
+function ensureVideo() {
+  if (videoA && videoB && overlay) return;
 
-  function ensureVideo() {
-    if (video) return;
-    video = document.createElement('video');
-    video.id = 'karoBgVideo';
-    video.className = 'karoBgVideo';
-    video.autoplay = true;
-    video.loop = false;
-    video.muted = true;
-    video.playsInline = true;    // mobile-safe autoplay
-    video.preload = 'auto';
-    win.appendChild(video);      // anchor to whole window for full coverage
+  videoA = document.createElement('video');
+  videoB = document.createElement('video');
 
-    overlay = document.createElement('div');
-    overlay.className = 'karoOverlay';
-    win.appendChild(overlay);
+  [videoA, videoB].forEach((v, i) => {
+    v.className = 'karoBgVideo';
+    v.autoplay = true;
+    v.loop = false;
+    v.muted = true;
+    v.playsInline = true;
+    v.preload = 'auto';
+    v.style.opacity = i === 0 ? 1 : 0;
 
-    // Auto advance background when a video ends
-    video.addEventListener('ended', next);
+    v.addEventListener('ended', next);
+    win.appendChild(v);
+  });
 
-    // Status updates
-    video.addEventListener('play', () => {
-      if (statusEl) {
-        statusEl.textContent = pl.length
-          ? `Playing ${idx+1}/${pl.length}: ${pl[idx]?.name || ''}`
-          : 'Playing';
-      }
-    });
-    video.addEventListener('pause', () => { if (statusEl) statusEl.textContent = 'Paused'; });
-  }
+  // ✅ CREATE OVERLAY PROPERLY
+  overlay = document.createElement('div');
+  overlay.className = 'karoOverlay';
+  win.appendChild(overlay);
+
+  // ✅ ENSURE CORRECT STACKING ORDER
+  win.appendChild(videoA);
+  win.appendChild(videoB);
+  win.appendChild(overlay);
+
+  activeVideo = videoA;
+  video = videoA;
+}
+
 
   /* ========= Playlist controls (APPENDED TO WINDOW to avoid .winBody clipping) ========= */
   let plWrap = null;
@@ -6452,7 +6503,9 @@ function rebuildLyricSourceOptions(metaEvs) {
       win.classList.add('karoHasBg');  // CSS applies only when BG is ON
       ensureVideo();
       video.style.display = '';
-      overlay.style.display = '';
+      if (!overlay) ensureVideo(); // ensure it exists
+if (overlay) overlay.style.display = enabled ? '' : 'none';
+
       // If a playlist item is selected, start it
       if (idx >= 0 && pl[idx]) { fadeTo(pl[idx].url); }
     } else {
@@ -6487,16 +6540,43 @@ function rebuildLyricSourceOptions(metaEvs) {
   const fadeMs = 250;
 
   const fmt = s => isFinite(s) ? `${Math.floor(s/60)}:${String(Math.floor(s%60)).padStart(2,'0')}` : '--:--';
+function fadeTo(srcUrl) {
+  if (!videoA || !videoB) return;
 
-  async function fadeTo(srcUrl) {
-    if (!video) return;
-    video.style.opacity = '0';
-    await new Promise(r => setTimeout(r, fadeMs));
-    video.src = srcUrl;
-    try { video.currentTime = 0; } catch {}
-    video.play().catch(() => {});
-    video.style.opacity = '1';
-  }
+  const next = (activeVideo === videoA) ? videoB : videoA;
+  const current = activeVideo;
+
+  next.oncanplay = null;
+  next.src = srcUrl;
+  next.load();
+
+  next.oncanplay = async () => {
+    next.oncanplay = null;
+
+    try { next.currentTime = 0; } catch {}
+
+    // ✅ START HIDDEN
+    next.style.opacity = 0;
+
+    // ✅ PLAY FIRST (let browser render frame)
+    await next.play().catch(()=>{});
+
+    // ✅ VERY SMALL DELAY → ensures frame is visible
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+
+        // ✅ NOW CROSSFADE (true overlap)
+        next.style.opacity = 1;
+        current.style.opacity = 0;
+
+      });
+    });
+
+    activeVideo = next;
+    video = next;
+  };
+}
+
 
   function playIndex(i) {
     if (i < 0 || i >= pl.length) return;
@@ -6872,6 +6952,7 @@ function rebuildLyricSourceOptions(metaEvs) {
   mo.observe(win, { childList: true, subtree: true });
 })();
 </script>
+
 <script>
 // Cleanup any uploaded font blob URL kept in sessionStorage when the page unloads
 window.addEventListener('unload', () => {
@@ -6948,6 +7029,54 @@ document.getElementById('midFiles').addEventListener('change', async (e) => {
   console.log("Loaded bytes:", buf.byteLength);
 });
 </script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  const picker = document.getElementById('strokePicker');
+  const karo = document.getElementById('winKaro');
+
+  if (!picker || !karo) {
+    console.log('Picker or winKaro not found');
+    return;
+  }
+
+  // apply initial color (from input)
+  karo.style.setProperty('--kara-progress-stroke', picker.value);
+
+  // update on change
+  picker.addEventListener('input', function () {
+    karo.style.setProperty('--kara-progress-stroke', this.value);
+  });
+});
+</script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  const picker = document.getElementById('strokePicker');
+  const karo = document.getElementById('winKaro');
+
+  if (!picker || !karo) return;
+
+  // ✅ LOAD saved color (if exists)
+  const savedColor = localStorage.getItem('kara.strokeColor');
+  if (savedColor) {
+    picker.value = savedColor;
+    karo.style.setProperty('--kara-progress-stroke', savedColor);
+  } else {
+    // apply default from input
+    karo.style.setProperty('--kara-progress-stroke', picker.value);
+  }
+
+  // ✅ SAVE + APPLY on change
+  picker.addEventListener('input', function () {
+    const color = this.value;
+
+    karo.style.setProperty('--kara-progress-stroke', color);
+    localStorage.setItem('kara.strokeColor', color);
+  });
+});
+</script>
+
+
 </body>
 </html>
 
