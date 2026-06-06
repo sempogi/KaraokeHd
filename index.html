@@ -949,7 +949,9 @@ Ultra‑Compact Mixer • Visualizer • Recording • Retune • Lyrics • Kar
        accept="*/*,.mid,.midi,.kar,audio/*,application/octet-stream" />
        
   <button id="btnInit" class="btn primary">Init</button>
+  
   <button id="btnPlay" class="btn" disabled aria-label="Play">▶</button>
+
   <button id="btnStop" class="btn" disabled aria-label="Stop">⏹</button>
   <button id="btnPanic" class="btn danger" disabled aria-label="Panic">⛑</button>
   <label style="margin-left:12px;">Continuous
@@ -1186,7 +1188,19 @@ Ultra‑Compact Mixer • Visualizer • Recording • Retune • Lyrics • Kar
 <div id="winKaro" class="floatWin" style="width:680px;" role="dialog" aria-modal="false" aria-labelledby="winKaroTitle">
 <div class="winHeader">
 <strong id="winKaroTitle">Solfeggio</strong>
-<button class="btn karoSimpleBtn" title="Settings">⚙️</button>
+  
+  <div id="karoQuickColors">
+    <button onclick="quickColor('#0000ff')" title="Male (Blue)">M</button>
+    <button onclick="quickColor('#ff4fd8')" title="Female (Pink)">F</button>
+    <button onclick="quickColor('#00ff88')" title="Duet (Green)">D</button>
+    
+ <button id="btnPlayMirror" aria-label="Quick Play">🔄</button>
+
+  
+</div>
+
+
+<button class="btn karoSimpleBtn" title="Settings">📺</button>
 <button class="btn karoPlaylistBtn" title="Playlist">📜</button>
 <span class="winBtns">
 <button class="btn" onclick="toggleWin('winKaroSettings')" aria-label="Karaoke Settings" title="Settings">⚙️</button>
@@ -1195,6 +1209,11 @@ Ultra‑Compact Mixer • Visualizer • Recording • Retune • Lyrics • Kar
 </span>
 </div>
 <div class="winBody" style="font-size:11px">
+   
+
+
+
+    
 <div id="karoLines">
   <div id="karoLineTop" class="karoLine"></div>
   <div id="karoLineBottom" class="karoLine"></div>
@@ -1680,7 +1699,19 @@ function bindUI() {
   // Optional trace so you know it was cleared
   try { log('Log cleared.'); } catch(_) {}
 });
-document.getElementById('btnInit').addEventListener('click', initAudio); document.getElementById('midFiles').addEventListener('change', onAddFiles); document.getElementById('btnPlay').addEventListener('click', ()=>startPlayback(true)); document.getElementById('btnStop').addEventListener('click', stopPlayback); document.getElementById('btnPanic').addEventListener('click', panicAll); document.getElementById('btnCalm').addEventListener('click', applyCalm); document.getElementById('preset').addEventListener('change', (e)=> {
+document.getElementById('btnInit').addEventListener('click', initAudio); document.getElementById('midFiles').addEventListener('change', onAddFiles); document.getElementById('btnPlay').addEventListener('click', ()=>startPlayback(true));
+
+// ✅ ADD THIS BLOCK RIGHT HERE
+const btnPlay = document.getElementById('btnPlay');
+const btnPlayMirror = document.getElementById('btnPlayMirror');
+
+if (btnPlayMirror && btnPlay) {
+  btnPlayMirror.addEventListener('click', () => {
+    btnPlay.click(); // forward trigger
+  });
+}
+
+ document.getElementById('btnStop').addEventListener('click', stopPlayback); document.getElementById('btnPanic').addEventListener('click', panicAll); document.getElementById('btnCalm').addEventListener('click', applyCalm); document.getElementById('preset').addEventListener('change', (e)=> {
 settings.ui.preset = e.target.value; persistSettings(); applyPreset(settings.ui.preset);
 }); document.getElementById('limStr').addEventListener('input', (e)=> {
 settings.audio.limiter = parseFloat(e.target.value || '0.78'); persistSettings(); onLimiter();
@@ -7074,8 +7105,34 @@ document.addEventListener('DOMContentLoaded', function () {
     localStorage.setItem('kara.strokeColor', color);
   });
 });
-</script>
 
+
+</script>
+<script>
+    
+function quickColor(hex) {
+    const picker = document.getElementById('karoFill');
+
+    picker.value = hex;
+    picker.dispatchEvent(new Event('input', { bubbles: true }));
+
+    // highlight active button
+    document.querySelectorAll('#quickColors button').forEach(btn => {
+        btn.classList.remove('active');
+        if (btn.style.backgroundColor === hex) {
+            btn.classList.add('active');
+        }
+    });
+}
+function syncPlayButtons() {
+  const btnPlay = document.getElementById('btnPlay');
+  const btnPlayMirror = document.getElementById('btnPlayMirror');
+  if (btnPlay && btnPlayMirror) {
+    btnPlayMirror.disabled = btnPlay.disabled;
+  }
+}
+
+</script>
 
 </body>
 </html>
