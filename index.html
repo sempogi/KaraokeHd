@@ -1189,15 +1189,31 @@ Ultra‑Compact Mixer • Visualizer • Recording • Retune • Lyrics • Kar
 <div class="winHeader">
 <strong id="winKaroTitle">Solfeggio</strong>
   
-  <div id="karoQuickColors">
-    <button onclick="quickColor('#0000ff')" title="Male (Blue)">M</button>
-    <button onclick="quickColor('#ff4fd8')" title="Female (Pink)">F</button>
-    <button onclick="quickColor('#00ff88')" title="Duet (Green)">D</button>
-    
- <button id="btnPlayMirror" aria-label="Quick Play">🔄</button>
+ <div id="karoQuickColors">
+    <button class="qc-btn" data-key="male">M</button>
+    <button class="qc-btn" data-key="female">F</button>
+    <button class="qc-btn" data-key="duet">D</button>
 
-  
+    <button id="btnPlayMirror">🔄</button>
+    <button onclick="openColorConfig()">⚙</button>
 </div>
+
+<div id="colorConfigModal" style="display:none;">
+    <div style="background:#222;padding:15px;color:#fff;">
+        <h4>Color Config</h4>
+
+        Male: <input type="color" id="cfg_male"><br><br>
+        Female: <input type="color" id="cfg_female"><br><br>
+        Duet: <input type="color" id="cfg_duet"><br><br>
+
+     <button onclick="saveColorConfig()">Save</button>
+<button onclick="resetColorConfig()">Reset</button>
+<button onclick="closeColorConfig()">Cancel</button>
+
+        
+    </div>
+</div>
+
 
 
 <button class="btn karoSimpleBtn" title="Settings">📺</button>
@@ -7108,29 +7124,102 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
 </script>
+
 <script>
-    
-function quickColor(hex) {
+ const defaultColors = {
+    male: "#0000ff",
+    female: "#ff4fd8",
+    duet: "#00ff88"
+};
+
+let quickColors = {};
+
+// LOAD COLORS
+function loadColors() {
+    const saved = localStorage.getItem("quickColors");
+    quickColors = saved ? JSON.parse(saved) : { ...defaultColors };
+    applyColors();
+}
+
+// APPLY COLORS TO BUTTONS
+function applyColors() {
+    document.querySelectorAll('.qc-btn').forEach(btn => {
+        const key = btn.dataset.key;
+        btn.style.backgroundColor = quickColors[key];
+    });
+}
+
+// CLICK BUTTON
+document.addEventListener("click", function(e) {
+    if (e.target.classList.contains("qc-btn")) {
+        quickColor(e.target);
+    }
+});
+
+function quickColor(btn) {
+    const hex = quickColors[btn.dataset.key];
     const picker = document.getElementById('karoFill');
 
     picker.value = hex;
     picker.dispatchEvent(new Event('input', { bubbles: true }));
 
-    // highlight active button
-    document.querySelectorAll('#quickColors button').forEach(btn => {
-        btn.classList.remove('active');
-        if (btn.style.backgroundColor === hex) {
-            btn.classList.add('active');
-        }
-    });
+    document.querySelectorAll('.qc-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
 }
+
+// OPEN CONFIG
+function openColorConfig() {
+    document.getElementById('colorConfigModal').style.display = 'block';
+
+    document.getElementById('cfg_male').value = quickColors.male;
+    document.getElementById('cfg_female').value = quickColors.female;
+    document.getElementById('cfg_duet').value = quickColors.duet;
+}
+
+// CLOSE CONFIG
+function closeColorConfig() {
+    document.getElementById('colorConfigModal').style.display = 'none';
+}
+
+// SAVE CONFIG
+function saveColorConfig() {
+    quickColors.male = document.getElementById('cfg_male').value;
+    quickColors.female = document.getElementById('cfg_female').value;
+    quickColors.duet = document.getElementById('cfg_duet').value;
+
+    localStorage.setItem("quickColors", JSON.stringify(quickColors));
+
+    applyColors();
+    closeColorConfig();
+}
+
+// YOUR EXISTING FUNCTION
 function syncPlayButtons() {
-  const btnPlay = document.getElementById('btnPlay');
-  const btnPlayMirror = document.getElementById('btnPlayMirror');
-  if (btnPlay && btnPlayMirror) {
-    btnPlayMirror.disabled = btnPlay.disabled;
-  }
+    const btnPlay = document.getElementById('btnPlay');
+    const btnPlayMirror = document.getElementById('btnPlayMirror');
+    if (btnPlay && btnPlayMirror) {
+        btnPlayMirror.disabled = btnPlay.disabled;
+    }
 }
+function resetColorConfig() {
+    // restore defaults
+    quickColors = { ...defaultColors };
+
+    // update inputs (so user sees it immediately)
+    document.getElementById('cfg_male').value = quickColors.male;
+    document.getElementById('cfg_female').value = quickColors.female;
+    document.getElementById('cfg_duet').value = quickColors.duet;
+
+    // update button colors instantly
+    applyColors();
+
+    // remove saved config
+    localStorage.removeItem("quickColors");
+}
+
+
+// INIT
+loadColors();
 
 </script>
 
