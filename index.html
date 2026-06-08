@@ -916,20 +916,10 @@ SOFTWARE.
 #winKaro.karo-countdown #karoLines {
   margin-top: 22vh;       /* ✅ prevents overlap with countdown */
 }
-/* BIG (default) */
 #winKaro .karoLine {
-  font-size: 26px !important;
+  font-size: var(--kara-size, 26px) !important;
 }
 
-/* MEDIUM */
-#winKaro.karo-medium .karoLine {
-  font-size: 22px !important;
-}
-
-/* SMALL */
-#winKaro.karo-small .karoLine {
-  font-size: 18px !important;
-}
 </style>
 
 </head>
@@ -1217,8 +1207,11 @@ Ultra‑Compact Mixer • Visualizer • Recording • Retune • Lyrics • Kar
     <button class="qc-btn" data-key="female">F</button>
     <button class="qc-btn" data-key="duet">D</button>
 
+<button id="karoSizeDown" class="btn">A−</button>
+<button id="karoSizeUp" class="btn">A+</button>
+
     <button id="btnPlayMirror">🔄</button>
-    <button id="karoToggleSize" >Size: BIG</button>
+  
     <button onclick="openColorConfig()">⚙</button>
     
 
@@ -7250,36 +7243,31 @@ function resetColorConfig() {
 loadColors();
 
 </script>
+<script> 
+let karaSize = 32; // starting size
 
-<script>
+const minSize = 16;
+const maxSize = 60;
 
-
-
-// ✅ PUT IT HERE (BOTTOM)
-let karoSizeMode = 0; // 0=BIG, 1=MEDIUM, 2=SMALL
-
-const btn = document.getElementById('karoToggleSize');
-
-btn.addEventListener('click', () => {
-  karoSizeMode = (karoSizeMode + 1) % 3;
-
+function applyKaraSize() {
   const win = document.getElementById('winKaro');
+  win.style.setProperty('--kara-size', karaSize + 'px');
+}
 
-  // reset classes
-  win.classList.remove('karo-medium', 'karo-small');
-
-  if (karoSizeMode === 1) {
-    win.classList.add('karo-medium');
-    btn.textContent = "Size: MEDIUM";
-  } 
-  else if (karoSizeMode === 2) {
-    win.classList.add('karo-small');
-    btn.textContent = "Size: SMALL";
-  } 
-  else {
-    btn.textContent = "Size: BIG";
-  }
+// A− button
+document.getElementById('karoSizeDown').addEventListener('click', () => {
+  karaSize = Math.max(minSize, karaSize - 2);
+  applyKaraSize();
 });
+
+// A+ button
+document.getElementById('karoSizeUp').addEventListener('click', () => {
+  karaSize = Math.min(maxSize, karaSize + 2);
+  applyKaraSize();
+});
+
+// apply initial
+applyKaraSize();
 
 </script>
 
