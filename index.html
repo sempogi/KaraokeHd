@@ -7252,7 +7252,18 @@ const maxSize = 60;
 function applyKaraSize() {
   const win = document.getElementById('winKaro');
   win.style.setProperty('--kara-size', karaSize + 'px');
+ localStorage.setItem('karaSize', karaSize);
 }
+
+
+const saved = localStorage.getItem('karaSize');
+
+if (saved !== null) {
+  karaSize = parseInt(saved);
+}
+
+applyKaraSize();
+
 
 // A− button
 document.getElementById('karoSizeDown').addEventListener('click', () => {
