@@ -916,7 +916,20 @@ SOFTWARE.
 #winKaro.karo-countdown #karoLines {
   margin-top: 22vh;       /* ✅ prevents overlap with countdown */
 }
+/* Base size */
+#winKaro #karoLines .karoLine {
+  font-size: 26px;
+}
 
+/* Medium (slightly long) */
+#winKaro #karoLines .karoLine.karo-medium {
+  font-size: 22px;
+}
+
+/* Long (very long lines) */
+#winKaro #karoLines .karoLine.karo-long {
+  font-size: 18px;
+}
 
 </style>
 
@@ -5368,8 +5381,8 @@ if (currentIsTop) {
   fillSlot(bottomSlot, currentLine, true);
 }
    
-fitKaraokeLine(topSlot);
-fitKaraokeLine(bottomSlot);
+checkKaraokeOverflow(topSlot);
+checkKaraokeOverflow(bottomSlot);
 
 } function loop(){ const nowRel=(audioCtx? audioCtx.currentTime:0) - (KaroState.startAt||0); draw(nowRel); KaroState.raf=requestAnimationFrame(loop); } window.Karo={ rebuild(){ KaroState.linesPrepared=prepareLines(lyrics.json); draw(0); }, start(startAt){ KaroState.startAt=(+startAt)|| (audioCtx? audioCtx.currentTime:0); cancelAnimationFrame(KaroState.raf||0); KaroState.raf=requestAnimationFrame(loop); }, stop(){ cancelAnimationFrame(KaroState.raf||0); KaroState.raf=0; } };
 })();
@@ -7231,25 +7244,26 @@ function resetColorConfig() {
     // remove saved config
     localStorage.removeItem("quickColors");
 }
-function fitKaraokeLine(el) {
-  const maxSize = 26;
-  const minSize = 14;
+function checkKaraokeOverflow(el) {
+  if (!el) return;
 
-  // ✅ Always reset first (IMPORTANT)
-  el.style.fontSize = maxSize + "px";
+  // ✅ Reset classes first
+  el.classList.remove('karo-medium', 'karo-long');
 
-  // ✅ Only shrink if overflow exists
-  if (el.scrollWidth <= el.clientWidth) return;
+  // ✅ IMPORTANT: measure at full size first
+  el.style.fontSize = "26px";
 
-  let size = maxSize;
+  // ✅ Check overflow
+  if (el.scrollWidth > el.clientWidth) {
+    el.classList.add('karo-medium');
 
-  while (el.scrollWidth > el.clientWidth && size > minSize) {
-    size--;
-    el.style.fontSize = size + "px";
+    // Re-check after applying medium
+    if (el.scrollWidth > el.clientWidth) {
+      el.classList.remove('karo-medium');
+      el.classList.add('karo-long');
+    }
   }
 }
-
-
 // INIT
 loadColors();
 
