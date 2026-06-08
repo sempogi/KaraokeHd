@@ -7232,20 +7232,23 @@ function resetColorConfig() {
     localStorage.removeItem("quickColors");
 }
 function fitKaraokeLine(el) {
-  let maxSize = 26;
-  let minSize = 14;
+  const maxSize = 26;
+  const minSize = 14;
 
-  // reset only when needed
-  if (!el.dataset.fitted) {
-    el.style.fontSize = maxSize + "px";
-    el.dataset.fitted = "1";
-  }
+  // ✅ Always reset first (IMPORTANT)
+  el.style.fontSize = maxSize + "px";
 
-  while (el.scrollWidth > el.clientWidth && maxSize > minSize) {
-    maxSize--;
-    el.style.fontSize = maxSize + "px";
+  // ✅ Only shrink if overflow exists
+  if (el.scrollWidth <= el.clientWidth) return;
+
+  let size = maxSize;
+
+  while (el.scrollWidth > el.clientWidth && size > minSize) {
+    size--;
+    el.style.fontSize = size + "px";
   }
 }
+
 
 // INIT
 loadColors();
