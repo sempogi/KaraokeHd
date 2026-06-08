@@ -647,7 +647,7 @@ SOFTWARE.
 }
 
 </style>
- 
+
 <style>
 /* === Do NOT touch #winKaro positioning; keep your centering/drag logic === */
 
@@ -726,34 +726,42 @@ SOFTWARE.
   opacity: 1;
 }
 /* === Controls anchored to the whole window (avoid .winBody clipping) === */
+
 #winKaro .karoPL {
   position: absolute;
-  z-index: 4;                 /* above header/lyrics */
+  z-index: 10;
   left: 8px;
   right: 8px;
-  bottom: 8px;                /* dock at bottom of the window */
-  background: rgba(0,0,0,0.35);
+  bottom: 8px;
+  max-height: min(45vh, 360px);
+  overflow: auto;
+  background: rgba(0,0,0,0.72);
   color: #fff;
   padding: 8px;
-  border-radius: 6px;
-  font-size: 11px;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,0.12);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.35);
+  backdrop-filter: blur(4px);
 }
-#winKaro .karoPL.hidden { display: none !important; }
+
+#winKaro .karoPL.hidden {
+  display: none !important;
+}
 
 #winKaro .karoPLRow {
   display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
   align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
 }
 
 #winKaro .karoPLList {
-  margin: 6px 0 0 0;
-  padding-left: 18px;
-  /* Adaptive height so the list doesn't feel “clipped” */
-  max-height: min(40vh, 320px);
-  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
+
 #winKaro:fullscreen .karoPLList,
 #winKaro:-webkit-full-screen .karoPLList {
   max-height: min(60vh, 480px);
@@ -770,7 +778,13 @@ SOFTWARE.
 #winKaro .karoPLList .dur { opacity: 0.7; }
 #winKaro .karoPLList .now { color: #0ff; }
 
-#winKaro .karoPLStatus { margin-top: 6px; opacity: 0.85; }
+
+#winKaro .karoPLStatus {
+  margin-top: 8px;
+  font-size: 11px;
+  opacity: 0.85;
+}
+
 
 /* === Simple in-window settings button (inline after title) === */
 #winKaro .karoSimpleBtn {
@@ -898,8 +912,11 @@ SOFTWARE.
   border-radius: 0 !important;
   margin: 0 !important;
   transform: none !important;
-  z-index: 2147483647 !important;
+  z-index: 20000 !important;
 }
+
+
+
 
 /* Pseudo-fullscreen for individual Karaoke window (when native FS not available) */
 #winKaro.karo-pseudo-fs {
@@ -911,7 +928,7 @@ SOFTWARE.
   border-radius: 0 !important;
   margin: 0 !important;
   transform: none !important;
-  z-index: 2147483647 !important;
+  z-index: 20000 !important;
 }
 /* =============================
    Karaoke vertical zoning FIX
@@ -929,6 +946,8 @@ SOFTWARE.
 #winKaro .karoLine {
   font-size: var(--kara-size, 26px) !important;
 }
+
+
 
 </style>
 
@@ -1249,7 +1268,7 @@ Ultra‑Compact Mixer • Visualizer • Recording • Retune • Lyrics • Kar
 
 
 <button class="btn karoSimpleBtn" title="Settings">📺</button>
-<button class="btn karoPlaylistBtn" title="Playlist">📜</button>
+<button id="btnKaroPlaylist" class="btn karoPlaylistBtn" title="Playlist">📜</button>
 <span class="winBtns">
 <button class="btn" onclick="toggleWin('winKaroSettings')" aria-label="Karaoke Settings" title="Settings">⚙️</button>
 <button class="btn" id="btnKaroFS" title="Fullscreen" aria-pressed="false">⛶</button>
@@ -1258,6 +1277,17 @@ Ultra‑Compact Mixer • Visualizer • Recording • Retune • Lyrics • Kar
 </div>
 <div class="winBody" style="font-size:11px">
    
+
+
+<div id="karoPlaylistPanel" class="karoPL hidden">
+  <div class="karoPLRow">
+    <strong>📜 Playlist</strong>
+    <button id="btnCloseKaroPlaylist" class="btn" type="button">✕</button>
+  </div>
+  <div id="karoPlaylistList" class="karoPLList"></div>
+  <div class="karoPLStatus" id="karoPlaylistStatus">Ready</div>
+</div>
+
 
 
 
@@ -1378,7 +1408,7 @@ function clearStatusLog() {
   if (wasAtBottom) el.scrollTop = el.scrollHeight;
 }
 
-let zCounter = 10000;
+let zCounter = 20010;
 function toggleWin(id) {
 const w = document.getElementById(id); if (!w) return; const show = (w.style.display === 'none' || w.style.display === ''); w.style.display = show? 'block': 'none'; if (show) {
 w.style.zIndex = (++zCounter).toString();
@@ -1755,6 +1785,7 @@ const btnPlayMirror = document.getElementById('btnPlayMirror');
 
 if (btnPlayMirror && btnPlay) {
   btnPlayMirror.addEventListener('click', () => {
+  resetKaraokeSwapState();
     btnPlay.click(); // forward trigger
   });
 }
@@ -2655,66 +2686,78 @@ selectTrack(0);
 }
 
 function updatePlaylistUI() {
-const list = document.getElementById('plList');
-list.innerHTML = '';
+  const list = document.getElementById('plList'); // old external list
+  const karoList = document.getElementById('karoPlaylistList'); // new internal list
+  const karoStatus = document.getElementById('karoPlaylistStatus');
 
-if (playlist.length === 0) {
-list.innerHTML = '<div class="plItem">(No items)</div>';
-return;
+  if (list) list.innerHTML = '';
+  if (karoList) karoList.innerHTML = '';
+
+  if (playlist.length === 0) {
+    if (list) list.innerHTML = '<div class="plItem">(No items)</div>';
+    if (karoList) karoList.innerHTML = '<div class="plItem">(No items)</div>';
+    if (karoStatus) karoStatus.textContent = 'No playlist items';
+    return;
+  }
+
+  playlist.forEach((t, i) => {
+    function makeRow() {
+      const row = document.createElement('div');
+      row.className = 'plItem' + (i === currentIndex ? ' active' : '');
+      row.dataset.index = i;
+      row.title = 'Tap to select';
+
+      const label = document.createElement('span');
+      label.textContent = (i + 1) + '. ' + t.name + (t.parsed ? '' : ' (noOb)');
+      label.style.flex = '1';
+
+      const playBtn = document.createElement('button');
+      playBtn.className = 'btn';
+      playBtn.type = 'button';
+      playBtn.textContent = '▶';
+      playBtn.title = 'Play';
+
+      playBtn.addEventListener('click', async (ev) => {
+        ev.stopPropagation();
+        selectTrack(i);
+
+        const mainPlay = document.getElementById('btnPlay');
+        if (mainPlay && !mainPlay.disabled) {
+          mainPlay.click();
+        } else {
+          if (!audioCtx) await initAudio();
+          await startPlayback(true);
+        }
+
+        // optional: hide internal playlist after playing
+        toggleKaroPlaylist(false);
+      });
+
+      row.addEventListener('click', () => {
+        selectTrack(i);
+        updatePlaylistUI();
+      }, { passive: true });
+
+      row.appendChild(label);
+      row.appendChild(playBtn);
+      return row;
+    }
+
+    if (list) list.appendChild(makeRow());
+    if (karoList) karoList.appendChild(makeRow());
+  });
+
+  if (karoStatus) {
+    const cur = playlist[currentIndex];
+    karoStatus.textContent = cur
+      ? 'Current: ' + cur.name
+      : 'Ready';
+  }
+
+  const btnStop = document.getElementById('btnStop');
+  if (btnStop) btnStop.disabled = (playlist.length === 0);
 }
-
-playlist.forEach((t, i)=> {
-const row = document.createElement('div');
-row.className = 'plItem' + (i === currentIndex ? ' active': '');
-row.dataset.index = i;
-row.title = 'Tap to select';
-
-const label = document.createElement('span');
-label.textContent = (i+1) + '. ' + t.name + (t.parsed ? '': ' (noOb)');
-
-const playBtn = document.createElement('button');
-playBtn.className = 'btn';
-playBtn.type = 'button';
-playBtn.textContent = '▶';
-playBtn.title = 'Play';
-
-playBtn.addEventListener('click', async (ev)=> {
-ev.stopPropagation();
-selectTrack(i);
-const mainPlay = document.getElementById('btnPlay');
-if (mainPlay && !mainPlay.disabled) {
-mainPlay.click();
-} else {
-if (!audioCtx) await initAudio();
-await startPlayback(true);
-}
-const winPl = document.getElementById('winPlaylist');
-const winKar = document.getElementById('winKaro');
-if (winPl) winPl.style.display = 'none';
-if (winKar) {
-winKar.style.display = 'block';
-winKar.style.zIndex = (++zCounter).toString();
-}
-});
-
-row.addEventListener('click',
-()=> {
-selectTrack(i);
-},
-{
-passive: true
-});
-
-row.appendChild(label);
-row.appendChild(playBtn);
-list.appendChild(row);
-});
-
-document.getElementById('btnStop').disabled = (playlist.length === 0);
-}
-
-
-
+``
 
 function resetStateForNewTrack() {
 for (let ch = 0; ch < 16; ch++) {
@@ -5325,70 +5368,97 @@ t: w.t, w: t.slice(pos, pos+len)
 }); pos += len;
 } return out;
 } function draw(nowRel) {
-const linesEl = document.getElementById('karoLines'); if (!linesEl) return;
-const topSlot = document.getElementById('karoLineTop');
-const bottomSlot = document.getElementById('karoLineBottom');
-if (!topSlot || !bottomSlot) return;
+  const linesEl = document.getElementById('karoLines'); 
+  if (!linesEl) return;
 
-function fillSlot(slot, line, isCurrent) {
-  slot.className = 'karoLine' + (isCurrent ? ' current active' : ' upcoming');
-  slot.innerHTML = '';
-  if (!line) return;
-  const tokens = (KaroState.case === 'none') ? (line.words || []) : textTransformWords(line.words || []);
-  if (tokens.length) {
-    drawTokensInto(slot, tokens, nowRel);
-  } else {
-    slot.textContent = caseTransformText(line.text || '');
+  const topSlot = document.getElementById('karoLineTop');
+  const bottomSlot = document.getElementById('karoLineBottom');
+  if (!topSlot || !bottomSlot) return;
+
+  function fillSlot(slot, line, isCurrent) {
+    slot.className = 'karoLine' + (isCurrent ? ' current active' : ' upcoming');
+    slot.innerHTML = '';
+    if (!line) return;
+
+    const tokens = (KaroState.case === 'none')
+      ? (line.words || [])
+      : textTransformWords(line.words || []);
+
+    if (tokens.length) {
+      drawTokensInto(slot, tokens, nowRel);
+    } else {
+      slot.textContent = caseTransformText(line.text || '');
+    }
   }
-}
 
-let li = -1;
-for (let i = 0; i < KaroState.linesPrepared.length; i++) {
-  const L = KaroState.linesPrepared[i];
-  if (L.main <= nowRel && nowRel < L.end) {
-    li = i;
-    break;
+  let li = -1;
+  for (let i = 0; i < KaroState.linesPrepared.length; i++) {
+    const L = KaroState.linesPrepared[i];
+    if (L.main <= nowRel && nowRel < L.end) {
+      li = i;
+      break;
+    }
+    if (L.main > nowRel) break;
   }
-  if (L.main > nowRel) break;
-}
-const firstLine = KaroState.linesPrepared[0];
-const lastLine = KaroState.linesPrepared[KaroState.linesPrepared.length - 1];
 
-KaroState.karoLineToggle = (KaroState.karoLineToggle === undefined) ? 0 : KaroState.karoLineToggle;
-KaroState.karoLastLineIndex = (KaroState.karoLastLineIndex === undefined) ? -1 : KaroState.karoLastLineIndex;
+  const firstLine = KaroState.linesPrepared[0];
+  const lastLine = KaroState.linesPrepared[KaroState.linesPrepared.length - 1];
 
-if (nowRel < (firstLine?.main ?? Infinity)) {
-  fillSlot(topSlot, firstLine, false);
-  fillSlot(bottomSlot, KaroState.linesPrepared[1], false);
-  return;
-}
+  KaroState.karoLineToggle = (KaroState.karoLineToggle === undefined) ? 0 : KaroState.karoLineToggle;
+  KaroState.karoLastLineIndex = (KaroState.karoLastLineIndex === undefined) ? -1 : KaroState.karoLastLineIndex;
+  KaroState.karoStarted = (KaroState.karoStarted === undefined) ? false : KaroState.karoStarted;
 
-if (nowRel >= (lastLine?.end ?? Infinity)) {
-  topSlot.className = 'karoLine';
-  bottomSlot.className = 'karoLine';
-  topSlot.textContent = 'Thank you!';
-  bottomSlot.textContent = 'karaokeHD™/Codex45/noobduo/Solfeggio';
-  return;
-}
+  // Before first lyric: preview only, keep startup deterministic
+  if (nowRel < (firstLine?.main ?? Infinity)) {
+    fillSlot(topSlot, firstLine, false);
+    fillSlot(bottomSlot, KaroState.linesPrepared[1], false);
 
-const currentLine = KaroState.linesPrepared[li];
-const nextLine = KaroState.linesPrepared[li + 1];
-if (li !== KaroState.karoLastLineIndex) {
-  if (KaroState.karoLastLineIndex !== -1) {
+    KaroState.karoStarted = false;
+    KaroState.karoLastLineIndex = -1;
+    KaroState.karoLineToggle = 0;
+
+    return;
+  }
+
+  // After last lyric
+  if (nowRel >= (lastLine?.end ?? Infinity)) {
+    topSlot.className = 'karoLine';
+    bottomSlot.className = 'karoLine';
+    topSlot.textContent = 'Thank you!';
+    bottomSlot.textContent = 'karaokeHD™/Codex45/noobduo/Solfeggio';
+
+    KaroState.karoStarted = false;
+    KaroState.karoLastLineIndex = -1;
+    KaroState.karoLineToggle = 0;
+
+    return;
+  }
+
+  // Safety: if no active line found, do nothing
+  if (li === -1) return;
+
+  const currentLine = KaroState.linesPrepared[li];
+  const nextLine = KaroState.linesPrepared[li + 1];
+
+  // First active lyric line always starts on TOP
+  if (!KaroState.karoStarted) {
+    KaroState.karoStarted = true;
+    KaroState.karoLastLineIndex = li;
+    KaroState.karoLineToggle = 0;
+  } else if (li !== KaroState.karoLastLineIndex) {
     KaroState.karoLineToggle = 1 - KaroState.karoLineToggle;
+    KaroState.karoLastLineIndex = li;
   }
-  KaroState.karoLastLineIndex = li;
-}
 
-const currentIsTop = KaroState.karoLineToggle === 0;
-if (currentIsTop) {
-  fillSlot(topSlot, currentLine, true);
-  fillSlot(bottomSlot, nextLine, false);
-} else {
-  fillSlot(topSlot, nextLine, false);
-  fillSlot(bottomSlot, currentLine, true);
-}
-   
+  const currentIsTop = KaroState.karoLineToggle === 0;
+
+  if (currentIsTop) {
+    fillSlot(topSlot, currentLine, true);
+    fillSlot(bottomSlot, nextLine, false);
+  } else {
+    fillSlot(topSlot, nextLine, false);
+    fillSlot(bottomSlot, currentLine, true);
+  }
 
 
 } function loop(){ const nowRel=(audioCtx? audioCtx.currentTime:0) - (KaroState.startAt||0); draw(nowRel); KaroState.raf=requestAnimationFrame(loop); } window.Karo={ rebuild(){ KaroState.linesPrepared=prepareLines(lyrics.json); draw(0); }, start(startAt){ KaroState.startAt=(+startAt)|| (audioCtx? audioCtx.currentTime:0); cancelAnimationFrame(KaroState.raf||0); KaroState.raf=requestAnimationFrame(loop); }, stop(){ cancelAnimationFrame(KaroState.raf||0); KaroState.raf=0; } };
@@ -5805,7 +5875,7 @@ if(!w) return;
 // Make sure it's visible so we can measure size accurately
 const prevDisplay=w.style.display;
 w.style.display='block';
-w.style.zIndex=(++zCounter).toString();
+//w.style.zIndex=(++zCounter).toString();
 
 // Measure after layout paints
 requestAnimationFrame(()=> {
@@ -6384,7 +6454,7 @@ function rebuildLyricSourceOptions(metaEvs) {
 
 
 
- <script>
+<script>
 (function () {
   const win = document.getElementById('winKaro');
   const body = win?.querySelector('.winBody');
@@ -6473,7 +6543,7 @@ function rebuildLyricSourceOptions(metaEvs) {
     playlistBtn.addEventListener('click', () => {
       const plWin = document.getElementById('winPlaylist');
       if (plWin) {
-        plWin.style.zIndex = '10002';  // Raise above karaoke window (10000)
+        plWin.style.zIndex = '200010';  // Raise above karaoke window (10000)
       }
       toggleWin('winPlaylist');
     });
@@ -7191,6 +7261,26 @@ document.addEventListener("click", function(e) {
     }
 });
 
+(function () {
+  const btnOpen = document.getElementById('btnKaroPlaylist');
+  const btnClose = document.getElementById('btnCloseKaroPlaylist');
+
+  if (btnOpen) {
+    btnOpen.addEventListener('click', (e) => {
+      e.stopPropagation();
+      toggleKaroPlaylist();
+    });
+  }
+
+  if (btnClose) {
+    btnClose.addEventListener('click', (e) => {
+      e.stopPropagation();
+      toggleKaroPlaylist(false);
+    });
+  }
+})();
+
+
 function quickColor(btn) {
     const hex = quickColors[btn.dataset.key];
     const picker = document.getElementById('karoFill');
@@ -7317,6 +7407,22 @@ document.getElementById('karoMoveDown').onclick = () => {
   karaOffset = Math.min(MAX_OFFSET, karaOffset + 10);
   applyKaraOffset();
 };
+function resetKaraokeSwapState() {
+  if (!window.KaroState) window.KaroState = {};
+  KaroState.karoLineToggle = 0;
+  KaroState.karoLastLineIndex = -1;
+  KaroState.karoStarted = false;
+}
+function toggleKaroPlaylist(force) {
+  const panel = document.getElementById('karoPlaylistPanel');
+  if (!panel) return;
+
+  const willShow = (typeof force === 'boolean')
+    ? force
+    : panel.classList.contains('hidden');
+
+  panel.classList.toggle('hidden', !willShow);
+}
 </script>
 </body>
 </html>
