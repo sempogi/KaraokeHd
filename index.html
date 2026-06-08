@@ -1220,6 +1220,8 @@ Ultra‑Compact Mixer • Visualizer • Recording • Retune • Lyrics • Kar
 
     <button id="btnPlayMirror">🔄</button>
     <button onclick="openColorConfig()">⚙</button>
+    <button id="karoToggleSize" class="btn">Size: BIG</button>
+
 </div>
 
 <div id="colorConfigModal" style="display:none;">
@@ -5381,8 +5383,7 @@ if (currentIsTop) {
   fillSlot(bottomSlot, currentLine, true);
 }
    
-checkKaraokeOverflow(topSlot);
-checkKaraokeOverflow(bottomSlot);
+
 
 } function loop(){ const nowRel=(audioCtx? audioCtx.currentTime:0) - (KaroState.startAt||0); draw(nowRel); KaroState.raf=requestAnimationFrame(loop); } window.Karo={ rebuild(){ KaroState.linesPrepared=prepareLines(lyrics.json); draw(0); }, start(startAt){ KaroState.startAt=(+startAt)|| (audioCtx? audioCtx.currentTime:0); cancelAnimationFrame(KaroState.raf||0); KaroState.raf=requestAnimationFrame(loop); }, stop(){ cancelAnimationFrame(KaroState.raf||0); KaroState.raf=0; } };
 })();
@@ -7244,26 +7245,31 @@ function resetColorConfig() {
     // remove saved config
     localStorage.removeItem("quickColors");
 }
-function checkKaraokeOverflow(el) {
-  if (!el) return;
+let karoSizeMode = 0; // 0=BIG, 1=MEDIUM, 2=SMALL
 
-  // ✅ Reset classes first
-  el.classList.remove('karo-medium', 'karo-long');
+const btn = document.getElementById('karoToggleSize');
 
-  // ✅ IMPORTANT: measure at full size first
-  el.style.fontSize = "26px";
+btn.addEventListener('click', () => {
+  karoSizeMode = (karoSizeMode + 1) % 3;
 
-  // ✅ Check overflow
-  if (el.scrollWidth > el.clientWidth) {
-    el.classList.add('karo-medium');
+  const win = document.getElementById('winKaro');
 
-    // Re-check after applying medium
-    if (el.scrollWidth > el.clientWidth) {
-      el.classList.remove('karo-medium');
-      el.classList.add('karo-long');
-    }
+  // reset classes
+  win.classList.remove('karo-medium', 'karo-small');
+
+  if (karoSizeMode === 1) {
+    win.classList.add('karo-medium');
+    btn.textContent = "Size: MEDIUM";
+  } 
+  else if (karoSizeMode === 2) {
+    win.classList.add('karo-small');
+    btn.textContent = "Size: SMALL";
+  } 
+  else {
+    btn.textContent = "Size: BIG";
   }
-}
+});
+
 // INIT
 loadColors();
 
