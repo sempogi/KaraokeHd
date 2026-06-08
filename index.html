@@ -1,4 +1,4 @@
-﻿<!--
+<!--
 KARAOKE HD — WebAudio Engine + Custom MIDI Parser
 Copyright © 2026 Sem Sabiduria. All rights reserved.
 
@@ -636,6 +636,12 @@ SOFTWARE.
 
   body.audio-only #top { gap: 8px; }
 }
+
+
+#winKaro #karoLines {
+  transform: translateY(var(--kara-offset, 0px));
+}
+
 </style>
  
 <style>
@@ -1209,6 +1215,9 @@ Ultra‑Compact Mixer • Visualizer • Recording • Retune • Lyrics • Kar
 
 <button id="karoSizeDown" class="btn">A−</button>
 <button id="karoSizeUp" class="btn">A+</button>
+<button id="karoMoveUp" class="btn">↑</button>
+<button id="karoMoveDown" class="btn">↓</button>
+
 
     <button id="btnPlayMirror">🔄</button>
   
@@ -7281,6 +7290,29 @@ document.getElementById('karoSizeUp').addEventListener('click', () => {
 applyKaraSize();
 
 </script>
+<script>
+let karaOffset = 0;
+const MIN_OFFSET = -200; // up limit
+const MAX_OFFSET = 200;  // down limit
 
+function applyKaraOffset() {
+  document.getElementById('winKaro')
+    .style.setProperty('--kara-offset', karaOffset + 'px');
+
+  localStorage.setItem('karaOffset', karaOffset);
+}
+
+// UP
+document.getElementById('karoMoveUp').onclick = () => {
+  karaOffset = Math.max(MIN_OFFSET, karaOffset - 10);
+  applyKaraOffset();
+};
+
+// DOWN
+document.getElementById('karoMoveDown').onclick = () => {
+  karaOffset = Math.min(MAX_OFFSET, karaOffset + 10);
+  applyKaraOffset();
+};
+</script>
 </body>
 </html>
