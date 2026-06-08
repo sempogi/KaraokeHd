@@ -692,8 +692,19 @@ SOFTWARE.
   text-shadow: 0 2px 6px rgba(0,0,0,0.75);
   padding: 10px 12px;
   line-height: 1.4;
-  background: transparent; /* Added this line */
+  background: transparent;
+
+  /* ✅ ADD THESE */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: clip;
+
+  font-size: clamp(14px, 3vw, 26px);
+
+  width: 100%;
+  box-sizing: border-box;
 }
+
 #winKaro #karoLines .karoLine.current,
 #winKaro #karoLines .karoLine.upcoming {
   font-size: clamp(18px, 5.2vw, 34px);
@@ -5356,6 +5367,10 @@ if (currentIsTop) {
   fillSlot(topSlot, nextLine, false);
   fillSlot(bottomSlot, currentLine, true);
 }
+   
+fitKaraokeLine(topSlot);
+fitKaraokeLine(bottomSlot);
+
 } function loop(){ const nowRel=(audioCtx? audioCtx.currentTime:0) - (KaroState.startAt||0); draw(nowRel); KaroState.raf=requestAnimationFrame(loop); } window.Karo={ rebuild(){ KaroState.linesPrepared=prepareLines(lyrics.json); draw(0); }, start(startAt){ KaroState.startAt=(+startAt)|| (audioCtx? audioCtx.currentTime:0); cancelAnimationFrame(KaroState.raf||0); KaroState.raf=requestAnimationFrame(loop); }, stop(){ cancelAnimationFrame(KaroState.raf||0); KaroState.raf=0; } };
 })();
 
@@ -7216,7 +7231,21 @@ function resetColorConfig() {
     // remove saved config
     localStorage.removeItem("quickColors");
 }
+function fitKaraokeLine(el) {
+  let maxSize = 26;
+  let minSize = 14;
 
+  // reset only when needed
+  if (!el.dataset.fitted) {
+    el.style.fontSize = maxSize + "px";
+    el.dataset.fitted = "1";
+  }
+
+  while (el.scrollWidth > el.clientWidth && maxSize > minSize) {
+    maxSize--;
+    el.style.fontSize = maxSize + "px";
+  }
+}
 
 // INIT
 loadColors();
