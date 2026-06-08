@@ -916,21 +916,20 @@ SOFTWARE.
 #winKaro.karo-countdown #karoLines {
   margin-top: 22vh;       /* ✅ prevents overlap with countdown */
 }
-/* Base size */
-#winKaro #karoLines .karoLine {
-  font-size: 26px;
+/* BIG (default) */
+#winKaro .karoLine {
+  font-size: 26px !important;
 }
 
-/* Medium (slightly long) */
-#winKaro #karoLines .karoLine.karo-medium {
-  font-size: 22px;
+/* MEDIUM */
+#winKaro.karo-medium .karoLine {
+  font-size: 22px !important;
 }
 
-/* Long (very long lines) */
-#winKaro #karoLines .karoLine.karo-long {
-  font-size: 18px;
+/* SMALL */
+#winKaro.karo-small .karoLine {
+  font-size: 18px !important;
 }
-
 </style>
 
 </head>
@@ -7286,4 +7285,3 @@ btn.addEventListener('click', () => {
 
 </body>
 </html>
-
