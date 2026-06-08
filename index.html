@@ -7246,6 +7246,17 @@ function resetColorConfig() {
     // remove saved config
     localStorage.removeItem("quickColors");
 }
+
+// INIT
+loadColors();
+
+</script>
+
+<script>
+
+
+
+// ✅ PUT IT HERE (BOTTOM)
 let karoSizeMode = 0; // 0=BIG, 1=MEDIUM, 2=SMALL
 
 const btn = document.getElementById('karoToggleSize');
@@ -7270,9 +7281,6 @@ btn.addEventListener('click', () => {
     btn.textContent = "Size: BIG";
   }
 });
-
-// INIT
-loadColors();
 
 </script>
 
