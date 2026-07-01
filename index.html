@@ -4817,11 +4817,6 @@ function makeSoftClipCurve(k = 0.80, n = 8192, pregain = 1.08) {
 //instrument function
 
 
-function readBE16(u8, o) {
-  const dv = new DataView(u8.buffer, u8.byteOffset || 0, u8.byteLength);
-  return dv.getUint16(o, false); // BE
-}
-
 function readBE32(u8, o) {
   const dv = new DataView(u8.buffer, u8.byteOffset || 0, u8.byteLength);
   return dv.getUint32(o, false); // BE
@@ -4915,22 +4910,22 @@ function iterateTrackEvents(smf, track, visitor) {
   }
 }
 
+
 function parseSMF(bytes) {
-if (!bytes || bytes.length < 14) throw new Error('MIDI file too short');
-if (String.fromCharCode(bytes[0], bytes[1], bytes[2], bytes[3]) !== 'MThd') throw new Error('Missing MThd'); const hLen = readBE32(bytes, 4); const format = readBE16(bytes, 8); const nTracks = readBE16(bytes, 10); const division = readBE16(bytes, 12); let pos = 8+hLen; const tracks = []; for (let ti = 0; ti < nTracks; ti++) {
-if (pos + 8 > bytes.length) throw new Error('Unexpected end of file while reading tracks');
-if (String.fromCharCode(bytes[pos], bytes[pos+1], bytes[pos+2], bytes[pos+3]) !== 'MTrk') throw new Error('Track '+ti+': missing MTrk'); const tLen = readBE32(bytes, pos+4); const dStart = pos+8; const dEnd = dStart+tLen; if (dEnd > bytes.length) throw new Error('Track '+ti+': exceeds file size'); tracks.push({
+if (String.fromCharCode(bytes[0], bytes[1], bytes[2], bytes[3]) !== 'MThd') throw new Error('Missing MThd'); const hLen = readBE32(bytes, 4); const format = (bytes[8]<<8)|bytes[9]; const nTracks = (bytes[10]<<8)|bytes[11]; const division = (bytes[12]<<8)|bytes[13]; let pos = 8+hLen; const tracks = []; for (let ti = 0; ti < nTracks; ti++) {
+if (String.fromCharCode(bytes[pos], bytes[pos+1], bytes[pos+2], bytes[pos+3]) !== 'MTrk') throw new Error('Track '+ti+': missing MTrk'); const tLen = readBE32(bytes, pos+4); const dStart = pos+8; const dEnd = dStart+tLen; tracks.push({
 dStart, dEnd
 }); pos = dEnd;
 } return {
 format,
 nTracks,
 division,
-divisionInfo: getDivisionInfo(division),
 tracks,
 bytes
 };
 }
+
+
 function buildTempoMap(smf) {
 const divisionInfo = smf.divisionInfo || getDivisionInfo(smf.division);
 const tpq = divisionInfo.kind === 'ppq' ? (divisionInfo.ppq || 480) : 480;
@@ -4960,6 +4955,7 @@ tempos,
 tickToSec
 };
 }
+
 function collectEvents(smf) {
 const out = []; for (const tr of smf.tracks) {
   iterateTrackEvents(smf, tr, (ev) => {
@@ -4982,6 +4978,8 @@ const out = []; for (const tr of smf.tracks) {
   });
 } out.sort((a, b)=>a.tick-b.tick); return out;
 }
+
+
 function collectMetaLyrics(smf) {
 const meta = []; for (const tr of smf.tracks) {
   iterateTrackEvents(smf, tr, (ev) => {
@@ -4992,6 +4990,7 @@ const meta = []; for (const tr of smf.tracks) {
   });
 } meta.sort((a, b)=>a.tick-b.tick); return meta;
 }
+
 
 
 (function() {
