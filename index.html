@@ -4817,6 +4817,11 @@ function makeSoftClipCurve(k = 0.80, n = 8192, pregain = 1.08) {
 //instrument function
 
 
+function readBE16(u8, o) {
+  const dv = new DataView(u8.buffer, u8.byteOffset || 0, u8.byteLength);
+  return dv.getUint16(o, false); // BE
+}
+
 function readBE32(u8, o) {
   const dv = new DataView(u8.buffer, u8.byteOffset || 0, u8.byteLength);
   return dv.getUint32(o, false); // BE
@@ -4831,50 +4836,124 @@ value: v,
 bytes: b
 };
 }
+
+function getDivisionInfo(divisionWord) {
+  if ((divisionWord & 0x8000) !== 0) {
+    const fpsCode = (divisionWord >> 8) & 0xFF;
+    const ticksPerFrame = divisionWord & 0xFF;
+    let fps = 24;
+    switch (fpsCode) {
+      case 0xE8: fps = 24; break;
+      case 0xE7: fps = 25; break;
+      case 0xE6: fps = 29.97; break;
+      case 0xE5: fps = 30; break;
+      default: fps = 24; break;
+    }
+    return { kind: 'smpte', fps, ticksPerFrame: ticksPerFrame || 1 };
+  }
+  return { kind: 'ppq', ppq: divisionWord || 480 };
+}
+
+function iterateTrackEvents(smf, track, visitor) {
+  const bytes = smf.bytes;
+  let p = track.dStart;
+  let tick = 0;
+  let run = null;
+
+  while (p < track.dEnd) {
+    const d = readVLQ(bytes, p);
+    p += d.bytes;
+    if (p >= track.dEnd) break;
+    tick += d.value;
+
+    let st = bytes[p++];
+    if (st < 0x80) {
+      if (run === null) {
+        continue;
+      }
+      p--;
+      st = run;
+    } else {
+      run = st;
+    }
+
+    if (st === 0xFF) {
+      if (p >= track.dEnd) break;
+      const type = bytes[p++];
+      const ln = readVLQ(bytes, p);
+      p += ln.bytes;
+      const ds = p;
+      const de = ds + ln.value;
+      if (de > track.dEnd) break;
+      visitor({ kind: 'meta', tick, type, data: bytes.slice(ds, de) });
+      p = de;
+      run = null;
+      continue;
+    }
+
+    if ((st & 0xF0) === 0xF0) {
+      const ln = readVLQ(bytes, p);
+      p += ln.bytes;
+      const de = p + ln.value;
+      if (de > track.dEnd) break;
+      p = de;
+      run = null;
+      continue;
+    }
+
+    const ch = st & 0x0F;
+    const T = st & 0xF0;
+    if (p >= track.dEnd) break;
+
+    let d1 = bytes[p++];
+    let d2 = null;
+    if (p < track.dEnd && T !== 0xC0 && T !== 0xD0) {
+      d2 = bytes[p++];
+    }
+
+    visitor({ kind: 'channel', tick, ch, status: T, data1: d1, data2: d2 });
+  }
+}
+
 function parseSMF(bytes) {
-if (String.fromCharCode(bytes[0], bytes[1], bytes[2], bytes[3]) !== 'MThd') throw new Error('Missing MThd'); const hLen = readBE32(bytes, 4); const format = (bytes[8]<<8)|bytes[9]; const nTracks = (bytes[10]<<8)|bytes[11]; const division = (bytes[12]<<8)|bytes[13]; let pos = 8+hLen; const tracks = []; for (let ti = 0; ti < nTracks; ti++) {
-if (String.fromCharCode(bytes[pos], bytes[pos+1], bytes[pos+2], bytes[pos+3]) !== 'MTrk') throw new Error('Track '+ti+': missing MTrk'); const tLen = readBE32(bytes, pos+4); const dStart = pos+8; const dEnd = dStart+tLen; tracks.push({
+if (!bytes || bytes.length < 14) throw new Error('MIDI file too short');
+if (String.fromCharCode(bytes[0], bytes[1], bytes[2], bytes[3]) !== 'MThd') throw new Error('Missing MThd'); const hLen = readBE32(bytes, 4); const format = readBE16(bytes, 8); const nTracks = readBE16(bytes, 10); const division = readBE16(bytes, 12); let pos = 8+hLen; const tracks = []; for (let ti = 0; ti < nTracks; ti++) {
+if (pos + 8 > bytes.length) throw new Error('Unexpected end of file while reading tracks');
+if (String.fromCharCode(bytes[pos], bytes[pos+1], bytes[pos+2], bytes[pos+3]) !== 'MTrk') throw new Error('Track '+ti+': missing MTrk'); const tLen = readBE32(bytes, pos+4); const dStart = pos+8; const dEnd = dStart+tLen; if (dEnd > bytes.length) throw new Error('Track '+ti+': exceeds file size'); tracks.push({
 dStart, dEnd
 }); pos = dEnd;
 } return {
 format,
 nTracks,
 division,
+divisionInfo: getDivisionInfo(division),
 tracks,
 bytes
 };
 }
 function buildTempoMap(smf) {
-const tpq = smf.division; const tempos = []; for (const tr of smf.tracks) {
-let p = tr.dStart,
-tick = 0,
-run = null; while (p < tr.dEnd) {
-const d = readVLQ(smf.bytes, p); p += d.bytes; tick += d.value; let st = smf.bytes[p++]; if (st < 0x80) {
-if (run === null) throw new Error('Running status without previous'); p--; st = run;
-} else {
-run = st;
-} if (st === 0xFF) {
-const type = smf.bytes[p++]; const ln = readVLQ(smf.bytes, p); p += ln.bytes; const ds = p,
-de = p+ln.value; if (type === 0x51 && ln.value === 3) {
-const a = smf.bytes[ds],
-b = smf.bytes[ds+1],
-c = smf.bytes[ds+2]; const usPerQN = (a<<16)|(b<<8)|c; tempos.push({
-tick, usPerQN
-});
-} p = de;
-} else if ((st&0xF0) === 0xF0) {
-const ln2 = readVLQ(smf.bytes, p); p += ln2.bytes+ln2.value;
-} else {
-if ((st&0xF0) !== 0xC0 && (st&0xF0) !== 0xD0) p++; p++;
+const divisionInfo = smf.divisionInfo || getDivisionInfo(smf.division);
+const tpq = divisionInfo.kind === 'ppq' ? (divisionInfo.ppq || 480) : 480;
+const tempos = []; for (const tr of smf.tracks) {
+  iterateTrackEvents(smf, tr, (ev) => {
+    if (ev.kind !== 'meta' || ev.type !== 0x51 || ev.data.length !== 3) return;
+    const a = ev.data[0], b = ev.data[1], c = ev.data[2];
+    const usPerQN = (a<<16)|(b<<8)|c;
+    tempos.push({ tick: ev.tick, usPerQN });
+  });
 }
-}
-} if (tempos.length === 0 || tempos[0].tick > 0) tempos.unshift({
+if (tempos.length === 0 || tempos[0].tick > 0) tempos.unshift({
 tick: 0, usPerQN: 500000
 }); tempos.sort((a, b)=>a.tick-b.tick); const tickToSec = (tick)=> {
-let sec = 0,
-prev = 0; for (let i = 0; i < tempos.length; i++) {
-const cur = tempos[i]; const next = tempos[i+1]?.tick ?? tick; const end = Math.min(next, tick); if (end <= prev) break; const dt = end-prev; sec += (dt * (cur.usPerQN/1e6)) / tpq; prev = end; if (end === tick) break;
-} return sec;
+  if (divisionInfo.kind === 'smpte') {
+    const fps = divisionInfo.fps || 24;
+    const ticksPerFrame = divisionInfo.ticksPerFrame || 1;
+    return tick / (fps * ticksPerFrame);
+  }
+  let sec = 0,
+  prev = 0; for (let i = 0; i < tempos.length; i++) {
+    const cur = tempos[i]; const next = tempos[i+1]?.tick ?? tick; const end = Math.min(next, tick); if (end <= prev) continue; const dt = end-prev; sec += (dt * (cur.usPerQN/1e6)) / tpq; prev = end; if (end === tick) break;
+  } return sec;
 }; return {
 tpq,
 tempos,
@@ -4883,69 +4962,34 @@ tickToSec
 }
 function collectEvents(smf) {
 const out = []; for (const tr of smf.tracks) {
-let p = tr.dStart,
-tick = 0,
-run = null; while (p < tr.dEnd) {
-const d = readVLQ(smf.bytes, p); p += d.bytes; tick += d.value; let st = smf.bytes[p++]; if (st < 0x80) {
-if (run === null) throw new Error('Running status without previous'); p--; st = run;
-} else {
-run = st;
-} if (st === 0xFF) {
-const type = smf.bytes[p++]; const ln = readVLQ(smf.bytes, p); p += ln.bytes; const ds = p,
-de = p+ln.value; p = de; run = null;
-} else if ((st&0xF0) === 0xF0) {
-const ln2 = readVLQ(smf.bytes, p); p += ln2.bytes+ln2.value; run = null;
-} else {
-const ch = st&0x0F; const T = (st&0xF0); let d1 = smf.bytes[p++]; let d2 = null; if (T !== 0xC0 && T !== 0xD0) {
-d2 = smf.bytes[p++];
-} if (T === 0x90) {
-const vel = d2|0; if (vel > 0) out.push({
-type: 'noteOn', tick, ch, note: d1|0, vel
-}); else out.push({
-type: 'noteOff', tick, ch, note: d1|0
-});
-} else if (T === 0x80) {
-out.push({
-type: 'noteOff', tick, ch, note: d1|0
-});
-} else if (T === 0xB0) {
-out.push({
-type: 'cc', tick, ch, cc: d1|0, value: (d2 || 0)|0
-});
-} else if (T === 0xC0) {
-out.push({
-type: 'program', tick, ch, prog: d1|0
-});
-} else if (T === 0xE0) {
-const v = ((d2|0)<<7)|(d1|0); out.push({
-type: 'pitchbend', tick, ch, lsb: v&0x7F, msb: (v>>7)&0x7F
-});
-}
-}
-}
+  iterateTrackEvents(smf, tr, (ev) => {
+    if (ev.kind !== 'channel') return;
+    const { tick, ch, status: T, data1: d1, data2: d2 } = ev;
+    if (T === 0x90) {
+      const vel = (d2 || 0) | 0;
+      if (vel > 0) out.push({ type: 'noteOn', tick, ch, note: d1 | 0, vel });
+      else out.push({ type: 'noteOff', tick, ch, note: d1 | 0 });
+    } else if (T === 0x80) {
+      out.push({ type: 'noteOff', tick, ch, note: d1 | 0 });
+    } else if (T === 0xB0) {
+      out.push({ type: 'cc', tick, ch, cc: d1 | 0, value: (d2 || 0) | 0 });
+    } else if (T === 0xC0) {
+      out.push({ type: 'program', tick, ch, prog: d1 | 0 });
+    } else if (T === 0xE0) {
+      const v = ((d2 | 0) << 7) | (d1 | 0);
+      out.push({ type: 'pitchbend', tick, ch, lsb: v & 0x7F, msb: (v >> 7) & 0x7F });
+    }
+  });
 } out.sort((a, b)=>a.tick-b.tick); return out;
 }
 function collectMetaLyrics(smf) {
 const meta = []; for (const tr of smf.tracks) {
-let p = tr.dStart,
-tick = 0,
-run = null; while (p < tr.dEnd) {
-const d = readVLQ(smf.bytes, p); p += d.bytes; tick += d.value; let st = smf.bytes[p++]; if (st < 0x80) {
-if (run === null) throw new Error('Running status without previous'); p--; st = run;
-} else {
-run = st;
-} if (st === 0xFF) {
-const type = smf.bytes[p++]; const ln = readVLQ(smf.bytes, p); p += ln.bytes; const ds = p,
-de = p+ln.value; if (type === 0x05 || type === 0x01 || type === 0x03) {
-meta.push({
-kind: 'meta', tick, type, data: smf.bytes.slice(ds, de)});
-} p = de; run = null;
-} else if ((st&0xF0) === 0xF0) {
-const ln2 = readVLQ(smf.bytes, p); p += ln2.bytes+ln2.value; run = null;
-} else {
-const T = (st&0xF0); if (T !== 0xC0 && T !== 0xD0) p++; p++;
-}
-}
+  iterateTrackEvents(smf, tr, (ev) => {
+    if (ev.kind !== 'meta') return;
+    if (ev.type === 0x05 || ev.type === 0x01 || ev.type === 0x03) {
+      meta.push({ kind: 'meta', tick: ev.tick, type: ev.type, data: ev.data });
+    }
+  });
 } meta.sort((a, b)=>a.tick-b.tick); return meta;
 }
 
