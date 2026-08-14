@@ -1851,10 +1851,12 @@ const btnPlayMirror = document.getElementById('btnPlayMirror');
 
 if (btnPlayMirror && btnPlay) {
   btnPlayMirror.addEventListener('click', () => {
-  resetKaraokeSwapState();
+    resetKaraokeSwapState();
     btnPlay.click(); // forward trigger
   });
 }
+
+syncPlayButtons();
 
  document.getElementById('btnStop').addEventListener('click', stopPlayback); document.getElementById('btnPanic').addEventListener('click', panicAll); document.getElementById('btnCalm').addEventListener('click', applyCalm); document.getElementById('preset').addEventListener('change', (e)=> {
 settings.ui.preset = e.target.value; persistSettings(); applyPreset(settings.ui.preset);
@@ -2500,6 +2502,7 @@ await audioCtx.resume();
   document.getElementById('btnStop').disabled = true;
   document.getElementById('btnPlay').disabled = !(playlist.length > 0 && currentIndex >= 0);
   document.getElementById('btnPanic').disabled = false;
+  syncPlayButtons();
   document.getElementById('btnInit').style.display = 'none';
 
  
@@ -2748,7 +2751,7 @@ name, file: f, parsed: false, tempo: null, events: null, lyrics: null
 });
 } updatePlaylistUI(); if (currentIndex===-1) {
 selectTrack(0);
-} document.getElementById('btnPlay').disabled = false; document.getElementById('btnStop').disabled = false; log('Files added: '+list.length+'.');
+} document.getElementById('btnPlay').disabled = false; document.getElementById('btnStop').disabled = false; syncPlayButtons(); log('Files added: '+list.length+'.');
 }
 
 function updatePlaylistUI() {
@@ -2845,7 +2848,7 @@ try {
 LyricsLive.rebuild(); Karo.rebuild();
 }catch(_) {}
 }
-const song = playlist[i]; _tempo = song.tempo; seq.events = song.events || []; updatePlaylistUI(); document.getElementById('btnPlay').disabled = false; document.getElementById('btnStop').disabled = false; log('Selected: '+song.name+(song.parsed?' • parsed': ' • lazy')); document.getElementById('currentTitle').textContent = playlist[i].name || '(Unknown title)';
+const song = playlist[i]; _tempo = song.tempo; seq.events = song.events || []; updatePlaylistUI(); document.getElementById('btnPlay').disabled = false; document.getElementById('btnStop').disabled = false; syncPlayButtons(); log('Selected: '+song.name+(song.parsed?' • parsed': ' • lazy')); document.getElementById('currentTitle').textContent = playlist[i].name || '(Unknown title)';
 
 if (song.lyrics) {
 lyrics.json = song.lyrics; renderLyricsStatic(); LyricsLive.rebuild(); Karo.rebuild();
